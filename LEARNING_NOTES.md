@@ -171,3 +171,45 @@ mvn spring-boot:run
 - 已理解 `HelloController` 负责接收 HTTP 请求并返回 JSON。
 - 已理解 Actuator 健康端点由自动配置提供，不是自定义 Controller。
 - 已理解当前默认健康检查包括磁盘空间、基础 `ping` 和 SSL 证书状态，但尚未检查数据库或 Redis。
+
+## 阶段 3：第一次前后端请求
+
+状态：已完成。
+
+### 调用链
+
+```text
+HomeView.vue 点击“调用后端”
+  → src/api/hello.ts
+  → src/utils/request.ts 中的 Axios 实例
+  → 浏览器请求 GET /dev-api/hello
+  → Vite 开发服务器代理并改写为 /health/hello
+  → http://127.0.0.1:8081/health/hello
+  → HealthApi 的 HelloController
+  → 页面显示返回的 message
+```
+
+### 代理配置
+
+- 浏览器侧基础地址：`/dev-api`
+- 后端目标地址：`http://127.0.0.1:8081`
+- 路径改写：`/dev-api/hello` → `/health/hello`
+- 可以通过本地环境变量 `VITE_API_TARGET` 临时覆盖代理目标，默认无需配置。
+
+### 验证结果
+
+- `npm run type-check`：通过。
+- `npm run build`：通过，共转换 89 个模块。
+- `npm audit`：0 个已知漏洞。
+- 成功场景：页面显示 `Hello from Health API`。
+- 失败场景：代理目标不可用时，页面显示“无法连接 Health API，请确认后端已在 8081 端口启动。”
+- 为验证失败场景启动的前端服务已停止。
+- 用户在 IDEA 中启动的 8081 后端未被停止。
+
+### 学习确认
+
+- 已在浏览器开发者工具的 Network 面板中观察请求 URL、GET 方法、HTTP 200 状态码和 JSON 响应。
+- 已理解 Axios `baseURL` 用于统一添加请求前缀。
+- 已理解 Vite 代理在开发环境中把 `/dev-api` 请求改写并转发给后端。
+- 已理解浏览器只看到发往 Vite 的请求，Vite 到 Spring Boot 的转发发生在开发服务器内部。
+- 已理解开发代理可以避免浏览器直接跨域请求后端。
