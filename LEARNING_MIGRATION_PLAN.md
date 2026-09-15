@@ -135,7 +135,7 @@ runtime-logs
 
 任务：
 
-- [ ] 确认 Java 21、Maven、Node.js 18+、npm 和 Git 可用。
+- [ ] 确认 Java 21、Maven、Node.js 20.19+、npm 和 Git 可用。
 - [ ] 确认当前 `health` 目录与 `health-old` 相互独立。
 - [ ] 在当前目录初始化 Git 仓库（如果尚未初始化）。
 - [ ] 创建适合 Java、Node.js 和 macOS 的 `.gitignore`。
@@ -156,15 +156,15 @@ runtime-logs
 
 任务：
 
-- [ ] 创建 `HealthShow` 目录。
-- [ ] 创建最小 `package.json`。
-- [ ] 安装 Vue 3、Vue Router、Vite 和 Vue Vite 插件。
-- [ ] 创建 `index.html`。
-- [ ] 创建 `src/main.ts`。
-- [ ] 创建 `src/App.vue`。
-- [ ] 创建一个首页组件。
-- [ ] 配置一个最简单的路由。
-- [ ] 添加开发和构建脚本。
+- [x] 创建新前端项目目录 `HealthWeb`（旧项目参考目录仍为 `health-old/HealthShow`）。
+- [x] 创建最小 `package.json`。
+- [x] 安装 Vue 3、Vue Router、Vite 和 Vue Vite 插件。
+- [x] 创建 `index.html`。
+- [x] 创建 `src/main.ts`。
+- [x] 创建 `src/App.vue`。
+- [x] 创建一个首页组件。
+- [x] 配置一个最简单的路由。
+- [x] 添加开发和构建脚本。
 
 此阶段暂时不要加入：
 
@@ -178,11 +178,11 @@ runtime-logs
 
 验收标准：
 
-- [ ] `npm run dev` 能启动前端。
-- [ ] 浏览器能看到“Health 学习版”首页。
-- [ ] 页面路由可以正常切换。
-- [ ] `npm run build` 成功。
-- [ ] 能解释 `index.html → main.ts → App.vue` 的关系。
+- [x] `npm run dev` 能启动前端。
+- [x] 浏览器能看到“Health 学习版”首页。
+- [x] 页面路由可以正常切换。
+- [x] `npm run build` 成功。
+- [x] 能解释 `index.html → main.ts → App.vue` 的关系。
 
 ### 阶段 2：建立最小 Spring Boot 后端
 

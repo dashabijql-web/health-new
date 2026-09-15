@@ -83,12 +83,38 @@ git push
 
 ## 阶段 1：最小 Vue 前端
 
-状态：尚未开始。
+状态：已完成。
 
-本阶段完成后补充以下内容：
+- 新前端项目目录：`HealthWeb`
+- 旧前端参考目录：`/Users/jiangqianli/Documents/code/health-old/HealthShow`
 
-- `index.html → main.ts → App.vue` 的启动关系。
-- 首页和路由的实现过程。
-- `npm run dev` 与 `npm run build` 的验证结果。
-- 正常场景和错误场景测试。
+### 启动链路
 
+```text
+index.html
+  → 加载 /src/main.ts
+  → 创建 Vue 应用并安装 Vue Router
+  → 把 App.vue 挂载到 #app
+  → App.vue 通过 RouterView 显示当前路由页面
+```
+
+### 当前页面和路由
+
+- `/`：显示“Health 学习版”首页。
+- `/about`：显示关于页面，用于验证前端路由切换。
+- `App.vue` 提供公共页面外壳和导航。
+- `src/router/index.ts` 负责把 URL 路径映射到页面组件。
+
+### 验证结果
+
+- `npm run type-check`：通过。
+- `npm run build`：通过，共转换 31 个模块。
+- `npm run dev -- --host 127.0.0.1`：成功启动在 `http://127.0.0.1:5173/`。
+- 浏览器首页渲染：通过。
+- 从首页切换到 `/about`：通过，显示“关于本项目”。
+- `npm audit`：0 个已知漏洞。
+
+### 学习确认
+
+- 已理解 `index.html → main.ts → App.vue` 的启动关系。
+- 当前阶段没有网络请求或用户输入，暂不添加人为构造的错误场景；后续接口阶段再验证失败处理。
