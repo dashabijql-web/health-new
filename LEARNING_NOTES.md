@@ -118,3 +118,56 @@ index.html
 
 - 已理解 `index.html → main.ts → App.vue` 的启动关系。
 - 当前阶段没有网络请求或用户输入，暂不添加人为构造的错误场景；后续接口阶段再验证失败处理。
+
+## 阶段 2：最小 Spring Boot 后端
+
+状态：已完成。
+
+- 新后端项目目录：`HealthApi`
+- 旧后端参考目录：`/Users/jiangqianli/Documents/code/health-old/HealthData`
+- Java 根包：`com.xzkj.health`
+- Spring Boot：3.5.16
+- 服务端口：8081，避免与旧项目常用端口冲突。
+- 应用上下文路径：`/health`
+
+### 当前调用关系
+
+```text
+HTTP GET /health/hello
+  → Spring DispatcherServlet
+  → HelloController.hello()
+  → JSON {"message":"Hello from Health API"}
+```
+
+### Java 环境提醒
+
+已在用户级 Zsh 登录环境中将 Java 21 配置为默认版本。新打开的终端中，`java`、`javac` 和 Maven 均已验证使用 Java 21。已经打开的旧终端可执行：
+
+```bash
+source ~/.zprofile
+java -version
+mvn -version
+```
+
+### 常用命令
+
+```bash
+cd /Users/jiangqianli/Documents/code/health/HealthApi
+mvn test
+mvn spring-boot:run
+```
+
+### 验证结果
+
+- `mvn test`：通过，2 个测试无失败。
+- `GET http://127.0.0.1:8081/health/hello`：返回预期 JSON。
+- `GET http://127.0.0.1:8081/health/actuator/health`：返回 `{"status":"UP"}`。
+- `GET http://127.0.0.1:8081/health/missing`：返回 HTTP 404。
+- 验证结束后已正常停止后端服务。
+
+### 学习确认
+
+- 已理解 `HealthApplication` 用于启动 Spring Boot 和创建应用容器。
+- 已理解 `HelloController` 负责接收 HTTP 请求并返回 JSON。
+- 已理解 Actuator 健康端点由自动配置提供，不是自定义 Controller。
+- 已理解当前默认健康检查包括磁盘空间、基础 `ping` 和 SSL 证书状态，但尚未检查数据库或 Redis。

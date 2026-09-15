@@ -190,13 +190,13 @@ runtime-logs
 
 任务：
 
-- [ ] 创建 `HealthData` Maven 项目。
-- [ ] 在 `pom.xml` 中只加入 Spring Web、Actuator 和测试依赖。
-- [ ] 创建 `HealthApplication` 启动类。
-- [ ] 创建 `/hello` 接口。
-- [ ] 配置 `/health` 作为应用上下文路径。
-- [ ] 配置 Actuator 健康检查。
-- [ ] 为 `/hello` 添加一个 Controller 测试。
+- [x] 创建新后端项目目录 `HealthApi`（旧项目参考目录仍为 `health-old/HealthData`）。
+- [x] 在 `pom.xml` 中只加入 Spring Web、Actuator 和测试依赖。
+- [x] 创建 `HealthApplication` 启动类。
+- [x] 创建 `/hello` 接口。
+- [x] 配置 `/health` 作为应用上下文路径。
+- [x] 配置 Actuator 健康检查。
+- [x] 为 `/hello` 添加一个 Controller 测试。
 
 此阶段暂时不要加入：
 
@@ -210,11 +210,11 @@ runtime-logs
 
 验收标准：
 
-- [ ] `mvn test` 成功。
-- [ ] `mvn spring-boot:run` 能启动后端。
-- [ ] `/health/actuator/health` 返回 `UP`。
-- [ ] `/health/hello` 返回预期 JSON。
-- [ ] 能解释启动类和 Controller 的作用。
+- [x] `mvn test` 成功。
+- [x] `mvn spring-boot:run` 能启动后端。
+- [x] `/health/actuator/health` 返回 `UP`。
+- [x] `/health/hello` 返回预期 JSON。
+- [x] 能解释启动类和 Controller 的作用。
 
 ### 阶段 3：打通前后端第一次请求
 
