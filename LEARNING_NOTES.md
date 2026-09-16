@@ -65,7 +65,7 @@ git push
 ### 数据库决定
 
 - 新项目复用旧项目现有的 SQL Server 数据库 `health`。
-- 数据库是否能够从新项目正常连接：待阶段 4 验证。
+- 数据库是否能够从新项目正常连接：阶段 4 已验证，现有 `health` 库可查询 `department` 表。
 - 数据库账号、密码和地址只放在本地环境变量或不提交的本地配置中。
 - 未确认影响范围并做好备份前，不执行删库、删表、清空数据或不可逆的表结构变更。
 - 自动化测试不得清空或覆盖现有业务数据。
@@ -213,3 +213,50 @@ HomeView.vue 点击“调用后端”
 - 已理解 Vite 代理在开发环境中把 `/dev-api` 请求改写并转发给后端。
 - 已理解浏览器只看到发往 Vite 的请求，Vite 到 Spring Boot 的转发发生在开发服务器内部。
 - 已理解开发代理可以避免浏览器直接跨域请求后端。
+
+## 阶段 4：数据库与部门管理（列表查询）
+
+状态：已完成部门只读查询，并从现有 `health` 数据库读出真实数据。增删改尚未开始。
+
+### 旧项目分析
+
+- 部门表：`department`。
+- 主键：`id`（自增）；层级字段：`parent_id`；展示与筛选字段：`dept_name`、`dept_code`；排序和状态字段：`sort_order`、`status`。
+- 调用链：`DepartmentController → DepartmentService → DepartmentMapper → department`。
+- 旧项目还包含树查询和增删改，本次只实现列表查询，避免在共享数据库上产生写入。
+- 旧前端状态约定：`status === 0` 表示正常，其他值表示停用。
+
+### 新项目实现
+
+- `HealthApi/pom.xml` 增加 SQL Server JDBC 驱动和 MyBatis-Plus Spring Boot 3 starter。
+- 数据库地址、账号、密码直接写在 `HealthApi/src/main/resources/application.yml`。
+- 服务端口是 `8081`。不需要环境变量，也不需要额外的 yml。
+- `DepartmentMapper.findList` 使用参数化 SQL。只有关键字不为空时才加 `LIKE` 条件，并用 `CONCAT` 拼接，避免 SQL Server 把空参数当成 varbinary。
+- `GET /health/department/list?keyword=...` 返回部门数组。
+- 前端：`src/api/department.ts`、`src/views/DepartmentView.vue`、路由 `/departments`。
+
+### 验证
+
+```bash
+mvn -q test -f HealthApi/pom.xml
+npm --prefix HealthWeb run type-check
+npm --prefix HealthWeb run build
+```
+
+结果：后端 4 个测试通过；前端 type-check 和 build 通过。
+
+真实数据库查询：
+
+- `GET /health/actuator/health`：`{"status":"UP"}`
+- `GET /health/department/list`：返回 20 条现有部门，例如综采一队。
+- `GET /health/department/list?keyword=采`：返回 4 条。
+- `GET /health/department/list?keyword=NO_SUCH_DEPT_XYZ`：返回空数组。
+
+启动后端：
+
+```bash
+cd HealthApi
+mvn spring-boot:run
+```
+
+改数据库账号密码时，只改 `application.yml`。IDEA 里直接启动即可，不用配环境变量。

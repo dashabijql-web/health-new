@@ -123,6 +123,74 @@ button:disabled {
   background: #fff0f0;
 }
 
+.request-result--loading {
+  color: #3d5c56;
+}
+
+.dept-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.dept-search {
+  flex: 1 1 16rem;
+}
+
+.dept-toolbar input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid #cde2dc;
+  border-radius: 0.75rem;
+  color: inherit;
+  background: #f7fbf9;
+  font: inherit;
+}
+
+.dept-toolbar button {
+  margin-top: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.dept-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.98rem;
+}
+
+.dept-table th,
+.dept-table td {
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid #dceae6;
+  text-align: left;
+}
+
+.dept-table th {
+  color: #398174;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.dept-toolbar + .request-result {
+  margin-top: 1rem;
+}
+
 @media (max-width: 520px) {
   .site-header {
     align-items: flex-start;

@@ -8,6 +8,7 @@ import { RouterLink, RouterView } from 'vue-router'
       <span class="brand">Health 学习版</span>
       <nav aria-label="主导航">
         <RouterLink to="/">首页</RouterLink>
+        <RouterLink to="/departments">部门</RouterLink>
         <RouterLink to="/about">关于</RouterLink>
       </nav>
     </header>

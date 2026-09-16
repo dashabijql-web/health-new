@@ -1,6 +1,16 @@
 spring:
   application:
     name: health-api
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://localhost:1433;databaseName=health;encrypt=true;trustServerCertificate=true;socketTimeout=12000
+    username: sa
+    password: "123abcd,"
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
 
 server:
   port: 8081

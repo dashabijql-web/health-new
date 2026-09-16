@@ -243,24 +243,24 @@ runtime-logs
 
 任务：
 
-- [ ] 确认现有 SQL Server 数据库 `health` 可访问。
-- [ ] 添加 SQL Server 驱动。
-- [ ] 添加 MyBatis-Plus。
-- [ ] 使用环境变量配置数据库连接。
-- [ ] 阅读并记录现有部门表结构，不直接执行破坏性迁移。
-- [ ] 创建 Department Entity。
-- [ ] 创建 Department Mapper。
-- [ ] 创建 Department Service。
-- [ ] 创建 Department Controller。
-- [ ] 创建前端 Department API。
-- [ ] 创建部门列表页面。
+- [x] 确认现有 SQL Server 数据库 `health` 可访问。
+- [x] 添加 SQL Server 驱动。
+- [x] 添加 MyBatis-Plus。
+- [x] 在 `application.yml` 中配置数据库连接。
+- [x] 阅读并记录现有部门表结构，不直接执行破坏性迁移。
+- [x] 创建 Department Entity。
+- [x] 创建 Department Mapper（只读列表查询）。
+- [x] 创建 Department Service（只读列表查询）。
+- [x] 创建 Department Controller（只读列表接口）。
+- [x] 创建前端 Department API。
+- [x] 创建部门列表页面。
 - [ ] 实现新增、修改和删除。
 - [ ] 添加输入校验和错误处理。
 - [ ] 添加后端 CRUD 测试。
 
 验收标准：
 
-- [ ] 部门列表来自现有 `health` 数据库。
+- [x] 部门列表来自现有 `health` 数据库。
 - [ ] 新增、修改和删除均可正常完成。
 - [ ] 非法输入不会写入数据库。
 - [ ] 页面刷新后数据仍然存在。
@@ -544,10 +544,10 @@ runtime-logs
 
 开始阶段只关注以下七项：
 
-- [ ] 里程碑 1：Vue 页面成功启动。
-- [ ] 里程碑 2：Spring Boot 成功启动。
-- [ ] 里程碑 3：Vue 成功调用 `/hello`。
-- [ ] 里程碑 4：部门列表查询成功。
+- [x] 里程碑 1：Vue 页面成功启动。
+- [x] 里程碑 2：Spring Boot 成功启动。
+- [x] 里程碑 3：Vue 成功调用 `/hello`。
+- [x] 里程碑 4：部门列表查询成功。
 - [ ] 里程碑 5：部门新增、修改和删除成功。
 - [ ] 里程碑 6：用户登录和退出成功。
 - [ ] 里程碑 7：登录后可以访问部门管理，未登录不能访问。
