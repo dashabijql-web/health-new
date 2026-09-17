@@ -280,12 +280,12 @@ npm --prefix HealthWeb run type-check
 
 ## 阶段 6：岗位列表（第一步）
 
-状态：已完成岗位只读查询。增删改尚未开始。
+状态：已完成岗位列表、新增、修改和删除。人员、设备尚未开始。
 
 - 旧项目岗位对应表 `job_type`（工种），接口 `/job-type/list`。
 - 新项目：`JobType` / `JobTypeMapper` / `JobTypeService` / `JobTypeController`。
-- 前端：`src/api/jobType.ts`、`src/views/JobTypeView.vue`、路由 `/job-types`，需登录。
-- 库中现有 12 条工种，例如综采工。
+- 前端：`src/api/jobType.ts`、`src/views/JobTypeView.vue`、路由 `/job-types`，需登录。超级管理员才能写。
+- 库中现有 12 条工种，例如综采工。风险等级 1/2/3 表示低/中/高。
 
 真实数据库查询：
 

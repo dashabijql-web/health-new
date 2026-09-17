@@ -7,16 +7,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(JobTypeController.class)
+@Import(RestExceptionHandler.class)
 @TestPropertySource(properties = "health.auth.enabled=false")
 class JobTypeControllerTest {
     @Autowired
@@ -46,5 +54,67 @@ class JobTypeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void createsJobType() throws Exception {
+        given(jobTypeService.create(any(JobType.class))).willAnswer(invocation -> {
+            JobType jobType = invocation.getArgument(0);
+            jobType.setId(21L);
+            jobType.setTypeName("学习测试岗位");
+            jobType.setTypeCode("LEARN-JOB");
+            return jobType;
+        });
+
+        mockMvc.perform(post("/job-type/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"typeName\":\"学习测试岗位\",\"typeCode\":\"LEARN-JOB\",\"riskLevel\":1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(21))
+                .andExpect(jsonPath("$.typeName").value("学习测试岗位"));
+    }
+
+    @Test
+    void rejectsCreateWhenServiceValidationFails() throws Exception {
+        given(jobTypeService.create(any(JobType.class)))
+                .willThrow(new IllegalArgumentException("岗位名称不能为空"));
+
+        mockMvc.perform(post("/job-type/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"typeName\":\"\",\"typeCode\":\"LEARN-JOB\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("岗位名称不能为空"));
+    }
+
+    @Test
+    void updatesJobType() throws Exception {
+        given(jobTypeService.update(any(JobType.class))).willAnswer(invocation -> {
+            JobType jobType = invocation.getArgument(0);
+            jobType.setId(21L);
+            jobType.setTypeName("学习测试岗位-改");
+            return jobType;
+        });
+
+        mockMvc.perform(put("/job-type/update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"id\":21,\"typeName\":\"学习测试岗位-改\",\"typeCode\":\"LEARN-JOB-U\",\"riskLevel\":2}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.typeName").value("学习测试岗位-改"));
+    }
+
+    @Test
+    void deletesJobType() throws Exception {
+        mockMvc.perform(delete("/job-type/delete/21"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("删除成功"));
+    }
+
+    @Test
+    void rejectsDeleteWhenServiceValidationFails() throws Exception {
+        doThrow(new IllegalArgumentException("岗位不存在")).when(jobTypeService).delete(99L);
+
+        mockMvc.perform(delete("/job-type/delete/99"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("岗位不存在"));
     }
 }

@@ -187,8 +187,14 @@ button:disabled {
   text-transform: uppercase;
 }
 
+.job-form {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+}
+
 .dept-form input,
-.dept-toolbar input {
+.dept-form select,
+.dept-toolbar input,
+.dept-table select {
   width: 100%;
   padding: 0.8rem 1rem;
   border: 1px solid #cde2dc;
@@ -219,7 +225,8 @@ button:disabled {
 }
 
 @media (max-width: 720px) {
-  .dept-form {
+  .dept-form,
+  .job-form {
     grid-template-columns: 1fr;
   }
 }

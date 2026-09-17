@@ -13,7 +13,8 @@ public final class AuthPathRules {
     }
 
     public static boolean requiresAdmin(String path, String method) {
-        if (!path.startsWith("/department")) {
+        boolean managed = path.startsWith("/department") || path.startsWith("/job-type");
+        if (!managed) {
             return false;
         }
         return "POST".equalsIgnoreCase(method)
