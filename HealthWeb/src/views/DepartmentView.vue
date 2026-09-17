@@ -2,7 +2,7 @@
 import axios from 'axios'
 import { onMounted, ref } from 'vue'
 
-import { createDepartment, fetchDepartmentList, updateDepartment, type Department } from '../api/department'
+import { createDepartment, deleteDepartment, fetchDepartmentList, updateDepartment, type Department } from '../api/department'
 
 type RequestStatus = 'idle' | 'loading' | 'success' | 'error'
 
@@ -19,6 +19,7 @@ const editingId = ref<number | null>(null)
 const editName = ref('')
 const editCode = ref('')
 const savingEdit = ref(false)
+const deletingId = ref<number | null>(null)
 const editMessage = ref('')
 const editStatus = ref<RequestStatus>('idle')
 
@@ -135,6 +136,32 @@ async function submitUpdate() {
   }
 }
 
+async function removeDepartment(department: Department) {
+  const confirmed = window.confirm(`确定删除「${department.deptName}」？删除会写入真实数据库。`)
+  if (!confirmed) {
+    return
+  }
+
+  deletingId.value = department.id
+  editStatus.value = 'loading'
+  editMessage.value = '正在删除…'
+
+  try {
+    await deleteDepartment(department.id)
+    if (editingId.value === department.id) {
+      cancelEdit()
+    }
+    editStatus.value = 'success'
+    editMessage.value = `已删除「${department.deptName}」。`
+    await loadDepartments()
+  } catch (error: unknown) {
+    editStatus.value = 'error'
+    editMessage.value = describeError(error)
+  } finally {
+    deletingId.value = null
+  }
+}
+
 function statusLabel(value: number | null): string {
   if (value === 0) {
     return '正常'
@@ -152,7 +179,7 @@ onMounted(loadDepartments)
   <section class="page-card">
     <p class="eyebrow">阶段 4 · 部门管理</p>
     <h1>部门列表</h1>
-    <p>从现有 health 数据库读取、新增和修改部门。名称和编码必填，会写入真实数据库，建议先改自己新增的测试部门。</p>
+    <p>从现有 health 数据库读取、新增、修改和删除部门。建议只动自己新增的测试部门，不要删综采队等真实数据。</p>
 
     <form class="dept-form" @submit.prevent="submitCreate">
       <label>
@@ -243,9 +270,19 @@ onMounted(loadDepartments)
                   取消
                 </button>
               </template>
-              <button v-else type="button" class="button-secondary" @click="startEdit(department)">
-                修改
-              </button>
+              <template v-else>
+                <button type="button" class="button-secondary" @click="startEdit(department)">
+                  修改
+                </button>
+                <button
+                  type="button"
+                  class="button-danger"
+                  :disabled="deletingId === department.id"
+                  @click="removeDepartment(department)"
+                >
+                  {{ deletingId === department.id ? '删除中…' : '删除' }}
+                </button>
+              </template>
             </td>
           </tr>
         </tbody>

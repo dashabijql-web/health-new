@@ -14,6 +14,8 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -107,6 +109,22 @@ class DepartmentControllerTest {
         mockMvc.perform(put("/department/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\":99,\"deptName\":\"学习测试部门\",\"deptCode\":\"LEARN01\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("部门不存在"));
+    }
+
+    @Test
+    void deletesDepartment() throws Exception {
+        mockMvc.perform(delete("/department/delete/21"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("删除成功"));
+    }
+
+    @Test
+    void rejectsDeleteWhenServiceValidationFails() throws Exception {
+        doThrow(new IllegalArgumentException("部门不存在")).when(departmentService).delete(99L);
+
+        mockMvc.perform(delete("/department/delete/99"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("部门不存在"));
     }

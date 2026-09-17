@@ -38,3 +38,7 @@ export async function updateDepartment(payload: UpdateDepartmentPayload): Promis
   const response = await request.put<Department>('/department/update', payload)
   return response.data
 }
+
+export async function deleteDepartment(id: number): Promise<void> {
+  await request.delete(`/department/delete/${id}`)
+}

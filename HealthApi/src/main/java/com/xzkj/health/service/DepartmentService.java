@@ -49,6 +49,17 @@ public class DepartmentService {
         return existing;
     }
 
+    public void delete(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("部门ID不能为空");
+        }
+        Department existing = departmentMapper.selectById(id);
+        if (existing == null) {
+            throw new IllegalArgumentException("部门不存在");
+        }
+        departmentMapper.deleteById(id);
+    }
+
     private void applyNameAndCode(Department target, String deptName, String deptCode) {
         String normalizedName = trimToEmpty(deptName);
         String normalizedCode = trimToEmpty(deptCode);

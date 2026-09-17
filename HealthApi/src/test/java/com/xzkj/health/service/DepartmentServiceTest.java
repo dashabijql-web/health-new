@@ -137,4 +137,29 @@ class DepartmentServiceTest {
         assertEquals("部门名称不能为空", exception.getMessage());
         verify(departmentMapper, never()).updateById(any(Department.class));
     }
+
+    @Test
+    void deletesDepartmentWhenIdExists() {
+        Department existing = new Department();
+        existing.setId(21L);
+        existing.setDeptName("学习测试部门");
+        when(departmentMapper.selectById(21L)).thenReturn(existing);
+        when(departmentMapper.deleteById(21L)).thenReturn(1);
+
+        departmentService.delete(21L);
+
+        verify(departmentMapper).deleteById(21L);
+    }
+
+    @Test
+    void rejectsDeleteWhenDepartmentDoesNotExist() {
+        when(departmentMapper.selectById(99L)).thenReturn(null);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> departmentService.delete(99L));
+
+        assertEquals("部门不存在", exception.getMessage());
+        verify(departmentMapper, never()).deleteById(99L);
+    }
 }

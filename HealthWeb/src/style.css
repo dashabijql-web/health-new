@@ -240,6 +240,15 @@ button:disabled {
   background: #e1f0ea;
 }
 
+.button-danger {
+  color: #8b2f2f;
+  background: #fff0f0;
+}
+
+.button-danger:hover {
+  background: #f8dede;
+}
+
 .dept-table th {
   color: #398174;
   font-size: 0.8rem;
