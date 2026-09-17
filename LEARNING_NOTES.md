@@ -289,12 +289,13 @@ npm --prefix HealthWeb run type-check
 
 ## 阶段 6：人员列表（第一步）
 
-状态：已完成人员分页查询。增删改、设备尚未开始。
+状态：已完成人员分页查询、新增、修改和删除。设备尚未开始。
 
 - 表 `employee` 约 1000 条，所以列表用 `OFFSET/FETCH` 分页，默认每页 20 条。
 - 关联 `department`、`job_type` 带出部门名和岗位名。
 - 接口：`GET /employee/list?keyword=&page=&size=`，返回 `{ list, total, page, size }`。
-- 前端：`src/api/employee.ts`、`src/views/EmployeeView.vue`、路由 `/employees`，需登录。
+- 前端：`src/api/employee.ts`、`src/views/EmployeeView.vue`、路由 `/employees`，需登录。超级管理员才能写。
+- 姓名、工号必填；工号有唯一索引；部门和岗位可选，但必须是现有记录。
 
 真实数据库查询：
 

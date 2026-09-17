@@ -187,7 +187,8 @@ button:disabled {
   text-transform: uppercase;
 }
 
-.job-form {
+.job-form,
+.emp-form {
   grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
 }
 
@@ -226,7 +227,8 @@ button:disabled {
 
 @media (max-width: 720px) {
   .dept-form,
-  .job-form {
+  .job-form,
+  .emp-form {
     grid-template-columns: 1fr;
   }
 }

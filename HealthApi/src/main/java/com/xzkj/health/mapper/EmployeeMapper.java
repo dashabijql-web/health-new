@@ -42,4 +42,12 @@ public interface EmployeeMapper extends BaseMapper<Employee> {
             "</script>"
     })
     long countList(@Param("keyword") String keyword);
+
+    @Select({
+            "<script>",
+            "SELECT COUNT(*) FROM employee WHERE emp_code = #{empCode}",
+            "  <if test='excludeId != null'> AND id != #{excludeId} </if>",
+            "</script>"
+    })
+    long countByEmpCode(@Param("empCode") String empCode, @Param("excludeId") Long excludeId);
 }
