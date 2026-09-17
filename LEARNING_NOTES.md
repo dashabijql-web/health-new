@@ -248,7 +248,31 @@ npm --prefix HealthWeb run type-check
 npm --prefix HealthWeb run build
 ```
 
-结果：后端列表与新增相关测试通过；前端 type-check 和 build 通过。
+结果：后端列表、新增、修改、删除相关测试通过；前端 type-check 和 build 通过。
+
+## 阶段 5：登录（最小可用）
+
+状态：已完成用户名密码登录、退出，并保护部门接口。角色和权限管理尚未开始。
+
+### 旧项目分析
+
+- 用户表：现有 `sys_user`，密码为 BCrypt。
+- 认证：Sa-Token，`StpUtil.login(userId)` 生成 Token。
+- 前端请求头：`satoken`。
+
+### 新项目实现
+
+- 加入 `sa-token-spring-boot3-starter` 和 `spring-security-crypto`。
+- `POST /health/auth/login`、`POST /health/auth/logout`、`GET /health/auth/info`。
+- 未登录访问 `/department/**` 返回 401「请先登录」。
+- 前端：登录页、localStorage 存 Token、Axios 自动带 Token、路由守卫、退出。
+
+### 验证
+
+```bash
+mvn -q test -f HealthApi/pom.xml
+npm --prefix HealthWeb run type-check
+```
 
 真实数据库查询：
 

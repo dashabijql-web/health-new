@@ -1,5 +1,21 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
+
+import { logout as logoutRequest } from './api/auth'
+import { clearLogin, displayName, token } from './utils/auth'
+
+const router = useRouter()
+
+async function logout() {
+  try {
+    await logoutRequest()
+  } catch {
+    // 本地退出仍然有效
+  } finally {
+    clearLogin()
+    await router.push({ name: 'login' })
+  }
+}
 </script>
 
 <template>
@@ -10,6 +26,10 @@ import { RouterLink, RouterView } from 'vue-router'
         <RouterLink to="/">首页</RouterLink>
         <RouterLink to="/departments">部门</RouterLink>
         <RouterLink to="/about">关于</RouterLink>
+        <RouterLink v-if="!token" to="/login">登录</RouterLink>
+        <button v-else type="button" class="link-button" @click="logout">
+          退出{{ displayName ? `（${displayName}）` : '' }}
+        </button>
       </nav>
     </header>
 

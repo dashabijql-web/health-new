@@ -22,3 +22,10 @@ management:
     web:
       exposure:
         include: health
+
+sa-token:
+  token-name: satoken
+  timeout: 86400
+  is-read-header: true
+  is-read-cookie: false
+  is-read-body: false

@@ -1,8 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import { getToken } from '../utils/auth'
 import AboutView from '../views/AboutView.vue'
 import DepartmentView from '../views/DepartmentView.vue'
 import HomeView from '../views/HomeView.vue'
+import LoginView from '../views/LoginView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -13,9 +15,15 @@ const router = createRouter({
       component: HomeView,
     },
     {
+      path: '/login',
+      name: 'login',
+      component: LoginView,
+    },
+    {
       path: '/departments',
       name: 'departments',
       component: DepartmentView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/about',
@@ -23,6 +31,16 @@ const router = createRouter({
       component: AboutView,
     },
   ],
+})
+
+router.beforeEach((to) => {
+  const loggedIn = Boolean(getToken())
+  if (to.meta.requiresAuth && !loggedIn) {
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
+  if (to.name === 'login' && loggedIn) {
+    return { name: 'departments' }
+  }
 })
 
 export default router
