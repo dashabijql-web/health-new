@@ -4,6 +4,7 @@ import { getToken } from '../utils/auth'
 import AboutView from '../views/AboutView.vue'
 import DepartmentView from '../views/DepartmentView.vue'
 import HomeView from '../views/HomeView.vue'
+import JobTypeView from '../views/JobTypeView.vue'
 import LoginView from '../views/LoginView.vue'
 
 const router = createRouter({
@@ -23,6 +24,12 @@ const router = createRouter({
       path: '/departments',
       name: 'departments',
       component: DepartmentView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/job-types',
+      name: 'job-types',
+      component: JobTypeView,
       meta: { requiresAuth: true },
     },
     {

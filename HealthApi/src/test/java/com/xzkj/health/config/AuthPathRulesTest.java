@@ -20,6 +20,12 @@ class AuthPathRulesTest {
     }
 
     @Test
+    void jobTypeListRequiresLoginButNotAdmin() {
+        assertTrue(AuthPathRules.requiresLogin("/job-type/list"));
+        assertFalse(AuthPathRules.requiresAdmin("/job-type/list", "GET"));
+    }
+
+    @Test
     void helloDoesNotRequireLogin() {
         assertFalse(AuthPathRules.requiresLogin("/hello"));
         assertFalse(AuthPathRules.requiresAdmin("/hello", "GET"));

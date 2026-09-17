@@ -25,6 +25,7 @@ async function logout() {
       <nav aria-label="主导航">
         <RouterLink to="/">首页</RouterLink>
         <RouterLink to="/departments">部门</RouterLink>
+        <RouterLink to="/job-types">岗位</RouterLink>
         <RouterLink to="/about">关于</RouterLink>
         <RouterLink v-if="!token" to="/login">登录</RouterLink>
         <button v-else type="button" class="link-button" @click="logout">

@@ -278,6 +278,15 @@ mvn -q test -f HealthApi/pom.xml
 npm --prefix HealthWeb run type-check
 ```
 
+## 阶段 6：岗位列表（第一步）
+
+状态：已完成岗位只读查询。增删改尚未开始。
+
+- 旧项目岗位对应表 `job_type`（工种），接口 `/job-type/list`。
+- 新项目：`JobType` / `JobTypeMapper` / `JobTypeService` / `JobTypeController`。
+- 前端：`src/api/jobType.ts`、`src/views/JobTypeView.vue`、路由 `/job-types`，需登录。
+- 库中现有 12 条工种，例如综采工。
+
 真实数据库查询：
 
 - `GET /health/actuator/health`：`{"status":"UP"}`
