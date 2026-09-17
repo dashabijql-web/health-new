@@ -50,4 +50,7 @@ public interface EmployeeMapper extends BaseMapper<Employee> {
             "</script>"
     })
     long countByEmpCode(@Param("empCode") String empCode, @Param("excludeId") Long excludeId);
+
+    @Select("SELECT id, emp_name, emp_code, gender, phone, dept_id, job_type_id, status FROM employee WHERE emp_code = #{empCode}")
+    Employee findByEmpCode(@Param("empCode") String empCode);
 }

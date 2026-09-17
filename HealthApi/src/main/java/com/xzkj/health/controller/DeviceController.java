@@ -47,4 +47,16 @@ public class DeviceController {
         deviceService.delete(id);
         return Map.of("message", "删除成功");
     }
+
+    @PostMapping("/{id}/bind")
+    public Map<String, String> bind(@PathVariable Long id, @RequestBody BindRequest request) {
+        deviceService.bind(id, request.getEmpCode());
+        return Map.of("message", "绑定成功");
+    }
+
+    @PostMapping("/{id}/unbind")
+    public Map<String, String> unbind(@PathVariable Long id) {
+        deviceService.unbind(id);
+        return Map.of("message", "解绑成功");
+    }
 }

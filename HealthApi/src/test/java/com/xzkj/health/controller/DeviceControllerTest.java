@@ -90,4 +90,20 @@ class DeviceControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("设备已绑定职工，请先解绑"));
     }
+
+    @Test
+    void bindsDevice() throws Exception {
+        mockMvc.perform(post("/device/3000/bind")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"empCode\":\"LEARN-EMP\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("绑定成功"));
+    }
+
+    @Test
+    void unbindsDevice() throws Exception {
+        mockMvc.perform(post("/device/3000/unbind"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("解绑成功"));
+    }
 }

@@ -50,3 +50,11 @@ export async function updateDevice(payload: DevicePayload & { id: number }): Pro
 export async function deleteDevice(id: number): Promise<void> {
   await request.delete(`/device/delete/${id}`)
 }
+
+export async function bindDevice(id: number, empCode: string): Promise<void> {
+  await request.post(`/device/${id}/bind`, { empCode })
+}
+
+export async function unbindDevice(id: number): Promise<void> {
+  await request.post(`/device/${id}/unbind`)
+}

@@ -2,7 +2,7 @@
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 
-import { createDevice, deleteDevice, fetchDeviceList, updateDevice, type Device } from '../api/device'
+import { bindDevice, createDevice, deleteDevice, fetchDeviceList, unbindDevice, updateDevice, type Device } from '../api/device'
 import { canManageDepartments } from '../utils/auth'
 
 type RequestStatus = 'idle' | 'loading' | 'success' | 'error'
@@ -24,6 +24,8 @@ const editImei = ref('')
 const editDeviceType = ref('watch')
 const savingEdit = ref(false)
 const deletingId = ref<number | null>(null)
+const bindingId = ref<number | null>(null)
+const bindEmpCode = ref('')
 const editMessage = ref('')
 const editStatus = ref<RequestStatus>('idle')
 
@@ -194,6 +196,64 @@ async function removeDevice(device: Device) {
   }
 }
 
+function startBind(device: Device) {
+  bindingId.value = device.id
+  bindEmpCode.value = ''
+  editStatus.value = 'idle'
+  editMessage.value = ''
+}
+
+function cancelBind() {
+  bindingId.value = null
+  bindEmpCode.value = ''
+}
+
+async function submitBind() {
+  if (bindingId.value == null) {
+    return
+  }
+  const empCode = bindEmpCode.value.trim()
+  if (!empCode) {
+    editStatus.value = 'error'
+    editMessage.value = '工号不能为空。'
+    return
+  }
+
+  editStatus.value = 'loading'
+  editMessage.value = '正在绑定…'
+
+  try {
+    await bindDevice(bindingId.value, empCode)
+    cancelBind()
+    editStatus.value = 'success'
+    editMessage.value = `已绑定职工 ${empCode}。`
+    await loadDevices()
+  } catch (error: unknown) {
+    editStatus.value = 'error'
+    editMessage.value = describeError(error)
+  }
+}
+
+async function submitUnbind(device: Device) {
+  const confirmed = window.confirm(`确定解绑设备 ${device.imei} 与「${device.empName}」？`)
+  if (!confirmed) {
+    return
+  }
+
+  editStatus.value = 'loading'
+  editMessage.value = '正在解绑…'
+
+  try {
+    await unbindDevice(device.id)
+    editStatus.value = 'success'
+    editMessage.value = `已解绑设备 ${device.imei}。`
+    await loadDevices()
+  } catch (error: unknown) {
+    editStatus.value = 'error'
+    editMessage.value = describeError(error)
+  }
+}
+
 function onlineLabel(value: number | null): string {
   if (value === 1) {
     return '在线'
@@ -212,7 +272,7 @@ onMounted(loadDevices)
     <p class="eyebrow">阶段 6 · 设备管理</p>
     <h1>设备列表</h1>
     <p>
-      从现有 health 库读取设备。IMEI 必须是 15 位数字且唯一。已绑定职工的设备不能删除。建议用测试 IMEI，例如 999000000000001。
+      从现有 health 库读取设备。一台设备只能绑一个职工，一个职工只能绑一台设备。建议用测试设备和测试工号，不要解绑张伟等真实数据。
     </p>
 
     <form v-if="canManageDepartments" class="dept-form" @submit.prevent="submitCreate">
@@ -298,9 +358,20 @@ onMounted(loadDevices)
                   取消
                 </button>
               </template>
+              <template v-else-if="bindingId === device.id">
+                <input v-model="bindEmpCode" maxlength="50" placeholder="职工工号" aria-label="职工工号">
+                <button type="button" @click="submitBind">确定绑定</button>
+                <button type="button" class="button-secondary" @click="cancelBind">取消</button>
+              </template>
               <template v-else>
                 <button type="button" class="button-secondary" @click="startEdit(device)">
                   修改
+                </button>
+                <button v-if="device.empId" type="button" class="button-secondary" @click="submitUnbind(device)">
+                  解绑
+                </button>
+                <button v-else type="button" class="button-secondary" @click="startBind(device)">
+                  绑定
                 </button>
                 <button
                   type="button"
