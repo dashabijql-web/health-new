@@ -9,6 +9,7 @@ public final class AuthPathRules {
     public static boolean requiresLogin(String path) {
         return path.startsWith("/department")
                 || path.startsWith("/job-type")
+                || path.startsWith("/employee")
                 || "/auth/info".equals(path);
     }
 

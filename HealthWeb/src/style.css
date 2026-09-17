@@ -297,6 +297,23 @@ button:disabled {
   background: #f8dede;
 }
 
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.pager button {
+  margin-top: 0;
+}
+
+.pager span {
+  color: #3d5c56;
+  font-size: 0.95rem;
+}
+
 .dept-table th {
   color: #398174;
   font-size: 0.8rem;

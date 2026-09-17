@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { getToken } from '../utils/auth'
 import AboutView from '../views/AboutView.vue'
 import DepartmentView from '../views/DepartmentView.vue'
+import EmployeeView from '../views/EmployeeView.vue'
 import HomeView from '../views/HomeView.vue'
 import JobTypeView from '../views/JobTypeView.vue'
 import LoginView from '../views/LoginView.vue'
@@ -30,6 +31,12 @@ const router = createRouter({
       path: '/job-types',
       name: 'job-types',
       component: JobTypeView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/employees',
+      name: 'employees',
+      component: EmployeeView,
       meta: { requiresAuth: true },
     },
     {

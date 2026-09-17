@@ -287,6 +287,15 @@ npm --prefix HealthWeb run type-check
 - 前端：`src/api/jobType.ts`、`src/views/JobTypeView.vue`、路由 `/job-types`，需登录。超级管理员才能写。
 - 库中现有 12 条工种，例如综采工。风险等级 1/2/3 表示低/中/高。
 
+## 阶段 6：人员列表（第一步）
+
+状态：已完成人员分页查询。增删改、设备尚未开始。
+
+- 表 `employee` 约 1000 条，所以列表用 `OFFSET/FETCH` 分页，默认每页 20 条。
+- 关联 `department`、`job_type` 带出部门名和岗位名。
+- 接口：`GET /employee/list?keyword=&page=&size=`，返回 `{ list, total, page, size }`。
+- 前端：`src/api/employee.ts`、`src/views/EmployeeView.vue`、路由 `/employees`，需登录。
+
 真实数据库查询：
 
 - `GET /health/actuator/health`：`{"status":"UP"}`
