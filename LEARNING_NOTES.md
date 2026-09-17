@@ -297,6 +297,14 @@ npm --prefix HealthWeb run type-check
 - 前端：`src/api/employee.ts`、`src/views/EmployeeView.vue`、路由 `/employees`，需登录。超级管理员才能写。
 - 姓名、工号必填；工号有唯一索引；部门和岗位可选，但必须是现有记录。
 
+## 阶段 6：设备列表（第一步）
+
+状态：已完成设备分页查询。增删改、绑定尚未开始。
+
+- 表 `device` 约 1000 台，`imei` 唯一。当前绑定看 `device_user.is_current = 1`。
+- 接口：`GET /device/list?keyword=&page=&size=`，可按 IMEI、姓名、工号搜索。
+- 前端：`src/api/device.ts`、`src/views/DeviceView.vue`、路由 `/devices`，需登录。
+
 真实数据库查询：
 
 - `GET /health/actuator/health`：`{"status":"UP"}`

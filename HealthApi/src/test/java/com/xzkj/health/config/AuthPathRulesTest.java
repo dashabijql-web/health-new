@@ -46,6 +46,12 @@ class AuthPathRulesTest {
     }
 
     @Test
+    void deviceListRequiresLoginButNotAdmin() {
+        assertTrue(AuthPathRules.requiresLogin("/device/list"));
+        assertFalse(AuthPathRules.requiresAdmin("/device/list", "GET"));
+    }
+
+    @Test
     void helloDoesNotRequireLogin() {
         assertFalse(AuthPathRules.requiresLogin("/hello"));
         assertFalse(AuthPathRules.requiresAdmin("/hello", "GET"));

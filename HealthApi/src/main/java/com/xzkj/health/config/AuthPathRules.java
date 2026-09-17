@@ -10,6 +10,7 @@ public final class AuthPathRules {
         return path.startsWith("/department")
                 || path.startsWith("/job-type")
                 || path.startsWith("/employee")
+                || path.startsWith("/device")
                 || "/auth/info".equals(path);
     }
 

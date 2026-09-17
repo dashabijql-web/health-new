@@ -27,6 +27,7 @@ async function logout() {
         <RouterLink to="/departments">部门</RouterLink>
         <RouterLink to="/job-types">岗位</RouterLink>
         <RouterLink to="/employees">人员</RouterLink>
+        <RouterLink to="/devices">设备</RouterLink>
         <RouterLink to="/about">关于</RouterLink>
         <RouterLink v-if="!token" to="/login">登录</RouterLink>
         <button v-else type="button" class="link-button" @click="logout">
