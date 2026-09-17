@@ -20,6 +20,11 @@ export interface DevicePage {
   size: number
 }
 
+export interface DevicePayload {
+  imei: string
+  deviceType?: string
+}
+
 export async function fetchDeviceList(keyword?: string, page = 1, size = 20): Promise<DevicePage> {
   const trimmed = keyword?.trim()
   const response = await request.get<DevicePage>('/device/list', {
@@ -30,4 +35,18 @@ export async function fetchDeviceList(keyword?: string, page = 1, size = 20): Pr
     },
   })
   return response.data
+}
+
+export async function createDevice(payload: DevicePayload): Promise<Device> {
+  const response = await request.post<Device>('/device/create', payload)
+  return response.data
+}
+
+export async function updateDevice(payload: DevicePayload & { id: number }): Promise<Device> {
+  const response = await request.put<Device>('/device/update', payload)
+  return response.data
+}
+
+export async function deleteDevice(id: number): Promise<void> {
+  await request.delete(`/device/delete/${id}`)
 }

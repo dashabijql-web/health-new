@@ -52,6 +52,13 @@ class AuthPathRulesTest {
     }
 
     @Test
+    void deviceWritesRequireAdmin() {
+        assertTrue(AuthPathRules.requiresAdmin("/device/create", "POST"));
+        assertTrue(AuthPathRules.requiresAdmin("/device/update", "PUT"));
+        assertTrue(AuthPathRules.requiresAdmin("/device/delete/1", "DELETE"));
+    }
+
+    @Test
     void helloDoesNotRequireLogin() {
         assertFalse(AuthPathRules.requiresLogin("/hello"));
         assertFalse(AuthPathRules.requiresAdmin("/hello", "GET"));

@@ -45,4 +45,15 @@ public interface DeviceMapper extends BaseMapper<Device> {
             "</script>"
     })
     long countList(@Param("keyword") String keyword);
+
+    @Select({
+            "<script>",
+            "SELECT COUNT(*) FROM device WHERE imei = #{imei}",
+            "  <if test='excludeId != null'> AND id != #{excludeId} </if>",
+            "</script>"
+    })
+    long countByImei(@Param("imei") String imei, @Param("excludeId") Long excludeId);
+
+    @Select("SELECT COUNT(*) FROM device_user WHERE device_id = #{deviceId} AND is_current = 1")
+    long countCurrentBindings(@Param("deviceId") Long deviceId);
 }

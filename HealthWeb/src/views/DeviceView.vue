@@ -2,7 +2,8 @@
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 
-import { fetchDeviceList, type Device } from '../api/device'
+import { createDevice, deleteDevice, fetchDeviceList, updateDevice, type Device } from '../api/device'
+import { canManageDepartments } from '../utils/auth'
 
 type RequestStatus = 'idle' | 'loading' | 'success' | 'error'
 
@@ -13,6 +14,18 @@ const total = ref(0)
 const status = ref<RequestStatus>('idle')
 const message = ref('')
 const devices = ref<Device[]>([])
+const newImei = ref('')
+const newDeviceType = ref('watch')
+const creating = ref(false)
+const createMessage = ref('')
+const createStatus = ref<RequestStatus>('idle')
+const editingId = ref<number | null>(null)
+const editImei = ref('')
+const editDeviceType = ref('watch')
+const savingEdit = ref(false)
+const deletingId = ref<number | null>(null)
+const editMessage = ref('')
+const editStatus = ref<RequestStatus>('idle')
 
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / size)))
 
@@ -78,6 +91,109 @@ function goNext() {
   return loadDevices()
 }
 
+async function submitCreate() {
+  const imei = newImei.value.trim()
+  if (!imei) {
+    createStatus.value = 'error'
+    createMessage.value = 'IMEI不能为空。'
+    return
+  }
+
+  creating.value = true
+  createStatus.value = 'loading'
+  createMessage.value = '正在保存设备…'
+
+  try {
+    const created = await createDevice({
+      imei,
+      deviceType: newDeviceType.value.trim() || 'watch',
+    })
+    newImei.value = ''
+    newDeviceType.value = 'watch'
+    createStatus.value = 'success'
+    createMessage.value = `已新增设备 ${created.imei}。`
+    keyword.value = created.imei
+    page.value = 1
+    await loadDevices()
+  } catch (error: unknown) {
+    createStatus.value = 'error'
+    createMessage.value = describeError(error)
+  } finally {
+    creating.value = false
+  }
+}
+
+function startEdit(device: Device) {
+  editingId.value = device.id
+  editImei.value = device.imei
+  editDeviceType.value = device.deviceType || 'watch'
+  editStatus.value = 'idle'
+  editMessage.value = ''
+}
+
+function cancelEdit() {
+  editingId.value = null
+}
+
+async function submitUpdate() {
+  if (editingId.value == null) {
+    return
+  }
+  const imei = editImei.value.trim()
+  if (!imei) {
+    editStatus.value = 'error'
+    editMessage.value = 'IMEI不能为空。'
+    return
+  }
+
+  savingEdit.value = true
+  editStatus.value = 'loading'
+  editMessage.value = '正在保存修改…'
+
+  try {
+    const updated = await updateDevice({
+      id: editingId.value,
+      imei,
+      deviceType: editDeviceType.value.trim() || 'watch',
+    })
+    cancelEdit()
+    editStatus.value = 'success'
+    editMessage.value = `已修改设备 ${updated.imei}。`
+    await loadDevices()
+  } catch (error: unknown) {
+    editStatus.value = 'error'
+    editMessage.value = describeError(error)
+  } finally {
+    savingEdit.value = false
+  }
+}
+
+async function removeDevice(device: Device) {
+  const confirmed = window.confirm(`确定删除设备 ${device.imei}？已绑定职工的设备不能删除。`)
+  if (!confirmed) {
+    return
+  }
+
+  deletingId.value = device.id
+  editStatus.value = 'loading'
+  editMessage.value = '正在删除…'
+
+  try {
+    await deleteDevice(device.id)
+    if (editingId.value === device.id) {
+      cancelEdit()
+    }
+    editStatus.value = 'success'
+    editMessage.value = `已删除设备 ${device.imei}。`
+    await loadDevices()
+  } catch (error: unknown) {
+    editStatus.value = 'error'
+    editMessage.value = describeError(error)
+  } finally {
+    deletingId.value = null
+  }
+}
+
 function onlineLabel(value: number | null): string {
   if (value === 1) {
     return '在线'
@@ -93,9 +209,33 @@ onMounted(loadDevices)
 
 <template>
   <section class="page-card">
-    <p class="eyebrow">阶段 6 · 设备列表</p>
+    <p class="eyebrow">阶段 6 · 设备管理</p>
     <h1>设备列表</h1>
-    <p>从现有 health 库的 device 表读取设备，带分页，并显示当前绑定的职工。当前只支持查询。</p>
+    <p>
+      从现有 health 库读取设备。IMEI 必须是 15 位数字且唯一。已绑定职工的设备不能删除。建议用测试 IMEI，例如 999000000000001。
+    </p>
+
+    <form v-if="canManageDepartments" class="dept-form" @submit.prevent="submitCreate">
+      <label>
+        <span>IMEI</span>
+        <input v-model="newImei" maxlength="15" placeholder="15位数字">
+      </label>
+      <label>
+        <span>类型</span>
+        <input v-model="newDeviceType" maxlength="50" placeholder="watch">
+      </label>
+      <button type="submit" :disabled="creating">
+        {{ creating ? '保存中…' : '新增设备' }}
+      </button>
+    </form>
+    <p
+      v-if="createMessage"
+      class="request-result"
+      :class="`request-result--${createStatus === 'idle' ? 'loading' : createStatus}`"
+      role="status"
+    >
+      {{ createMessage }}
+    </p>
 
     <form class="dept-toolbar" @submit.prevent="searchDevices">
       <label class="dept-search">
@@ -131,17 +271,47 @@ onMounted(loadDevices)
             <th>绑定人员</th>
             <th>工号</th>
             <th>最后在线</th>
+            <th v-if="canManageDepartments">操作</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="device in devices" :key="device.id">
-            <td>{{ device.imei }}</td>
-            <td>{{ device.deviceType || '-' }}</td>
+            <td>
+              <input v-if="editingId === device.id" v-model="editImei" maxlength="15" aria-label="IMEI">
+              <template v-else>{{ device.imei }}</template>
+            </td>
+            <td>
+              <input v-if="editingId === device.id" v-model="editDeviceType" maxlength="50" aria-label="类型">
+              <template v-else>{{ device.deviceType || '-' }}</template>
+            </td>
             <td>{{ onlineLabel(device.onlineStatus) }}</td>
             <td>{{ device.batteryLevel == null ? '-' : `${device.batteryLevel}%` }}</td>
             <td>{{ device.empName || '未绑定' }}</td>
             <td>{{ device.empCode || '-' }}</td>
             <td>{{ device.lastOnlineTime || '-' }}</td>
+            <td v-if="canManageDepartments" class="dept-actions">
+              <template v-if="editingId === device.id">
+                <button type="button" :disabled="savingEdit" @click="submitUpdate">
+                  {{ savingEdit ? '保存中…' : '保存' }}
+                </button>
+                <button type="button" class="button-secondary" :disabled="savingEdit" @click="cancelEdit">
+                  取消
+                </button>
+              </template>
+              <template v-else>
+                <button type="button" class="button-secondary" @click="startEdit(device)">
+                  修改
+                </button>
+                <button
+                  type="button"
+                  class="button-danger"
+                  :disabled="deletingId === device.id"
+                  @click="removeDevice(device)"
+                >
+                  {{ deletingId === device.id ? '删除中…' : '删除' }}
+                </button>
+              </template>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -151,5 +321,13 @@ onMounted(loadDevices)
         <button type="button" :disabled="page >= totalPages" @click="goNext">下一页</button>
       </div>
     </div>
+    <p
+      v-if="editMessage"
+      class="request-result"
+      :class="`request-result--${editStatus === 'idle' ? 'loading' : editStatus}`"
+      role="status"
+    >
+      {{ editMessage }}
+    </p>
   </section>
 </template>

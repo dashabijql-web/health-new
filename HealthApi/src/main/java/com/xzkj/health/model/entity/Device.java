@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
+import java.time.LocalDateTime;
+
 @TableName("device")
 public class Device {
     @TableId(type = IdType.AUTO)
@@ -13,6 +15,7 @@ public class Device {
     private Integer status;
     private Integer onlineStatus;
     private Integer batteryLevel;
+    private LocalDateTime createTime;
 
     public Long getId() {
         return id;
@@ -60,5 +63,13 @@ public class Device {
 
     public void setBatteryLevel(Integer batteryLevel) {
         this.batteryLevel = batteryLevel;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
     }
 }

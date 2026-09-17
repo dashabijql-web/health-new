@@ -299,11 +299,12 @@ npm --prefix HealthWeb run type-check
 
 ## 阶段 6：设备列表（第一步）
 
-状态：已完成设备分页查询。增删改、绑定尚未开始。
+状态：已完成设备分页查询、新增、修改和删除。人员与设备绑定尚未开始。
 
 - 表 `device` 约 1000 台，`imei` 唯一。当前绑定看 `device_user.is_current = 1`。
 - 接口：`GET /device/list?keyword=&page=&size=`，可按 IMEI、姓名、工号搜索。
-- 前端：`src/api/device.ts`、`src/views/DeviceView.vue`、路由 `/devices`，需登录。
+- 前端：`src/api/device.ts`、`src/views/DeviceView.vue`、路由 `/devices`，需登录。超级管理员才能写。
+- IMEI 必须 15 位数字且唯一；已绑定职工的设备不能删除。
 
 真实数据库查询：
 
