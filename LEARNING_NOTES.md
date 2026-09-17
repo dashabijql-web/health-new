@@ -216,14 +216,14 @@ HomeView.vue 点击“调用后端”
 
 ## 阶段 4：数据库与部门管理（列表查询）
 
-状态：已完成部门列表查询和新增。修改、删除尚未开始。
+状态：已完成部门列表查询、新增和修改。删除尚未开始。
 
 ### 旧项目分析
 
 - 部门表：`department`。
 - 主键：`id`（自增）；层级字段：`parent_id`；展示与筛选字段：`dept_name`、`dept_code`；排序和状态字段：`sort_order`、`status`。
 - 调用链：`DepartmentController → DepartmentService → DepartmentMapper → department`。
-- 旧项目还包含树查询和增删改。列表之后先实现新增：`POST /department/create`，名称和编码必填。
+- 旧项目还包含树查询和增删改。已实现新增 `POST /department/create`、修改 `PUT /department/update`，名称和编码必填。删除尚未开始。
 - 旧前端状态约定：`status === 0` 表示正常，其他值表示停用。
 
 ### 新项目实现
@@ -235,6 +235,7 @@ HomeView.vue 点击“调用后端”
 - `GET /health/department/list?keyword=...` 返回部门数组。
 - 前端：`src/api/department.ts`、`src/views/DepartmentView.vue`、路由 `/departments`。
 - `DepartmentService.create` 校验名称、编码非空及长度，默认状态 `0`（正常），然后调用 MyBatis-Plus `insert`。
+- `DepartmentService.update` 先按 id 查出原记录，不存在则拒绝；再改名称和编码，调用 `updateById`，避免把未提交的字段覆盖成空。
 - 非法输入抛出 `IllegalArgumentException`，由 `RestExceptionHandler` 返回 HTTP 400 和 `{ "message": "..." }`。
 - 表 `department` 中 `dept_name`、`dept_code` 为 NOT NULL；`create_time` 有数据库默认值，插入时不必手写。
 

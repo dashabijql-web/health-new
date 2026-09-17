@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -77,5 +78,36 @@ class DepartmentControllerTest {
                         .content("{\"deptName\":\"\",\"deptCode\":\"LEARN01\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("部门名称不能为空"));
+    }
+
+    @Test
+    void updatesDepartment() throws Exception {
+        given(departmentService.update(any(Department.class))).willAnswer(invocation -> {
+            Department department = invocation.getArgument(0);
+            department.setId(21L);
+            department.setDeptName("学习测试部门-改");
+            department.setDeptCode("LEARN01-U");
+            return department;
+        });
+
+        mockMvc.perform(put("/department/update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"id\":21,\"deptName\":\"学习测试部门-改\",\"deptCode\":\"LEARN01-U\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(21))
+                .andExpect(jsonPath("$.deptName").value("学习测试部门-改"))
+                .andExpect(jsonPath("$.deptCode").value("LEARN01-U"));
+    }
+
+    @Test
+    void rejectsUpdateWhenServiceValidationFails() throws Exception {
+        given(departmentService.update(any(Department.class)))
+                .willThrow(new IllegalArgumentException("部门不存在"));
+
+        mockMvc.perform(put("/department/update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"id\":99,\"deptName\":\"学习测试部门\",\"deptCode\":\"LEARN01\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("部门不存在"));
     }
 }

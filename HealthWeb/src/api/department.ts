@@ -27,3 +27,14 @@ export async function createDepartment(payload: CreateDepartmentPayload): Promis
   const response = await request.post<Department>('/department/create', payload)
   return response.data
 }
+
+export interface UpdateDepartmentPayload {
+  id: number
+  deptName: string
+  deptCode: string
+}
+
+export async function updateDepartment(payload: UpdateDepartmentPayload): Promise<Department> {
+  const response = await request.put<Department>('/department/update', payload)
+  return response.data
+}

@@ -2,7 +2,7 @@
 import axios from 'axios'
 import { onMounted, ref } from 'vue'
 
-import { createDepartment, fetchDepartmentList, type Department } from '../api/department'
+import { createDepartment, fetchDepartmentList, updateDepartment, type Department } from '../api/department'
 
 type RequestStatus = 'idle' | 'loading' | 'success' | 'error'
 
@@ -15,6 +15,12 @@ const newDeptCode = ref('')
 const creating = ref(false)
 const createMessage = ref('')
 const createStatus = ref<RequestStatus>('idle')
+const editingId = ref<number | null>(null)
+const editName = ref('')
+const editCode = ref('')
+const savingEdit = ref(false)
+const editMessage = ref('')
+const editStatus = ref<RequestStatus>('idle')
 
 function describeError(error: unknown): string {
   if (!axios.isAxiosError(error)) {
@@ -81,6 +87,54 @@ async function submitCreate() {
   }
 }
 
+function startEdit(department: Department) {
+  editingId.value = department.id
+  editName.value = department.deptName
+  editCode.value = department.deptCode
+  editStatus.value = 'idle'
+  editMessage.value = ''
+}
+
+function cancelEdit() {
+  editingId.value = null
+  editName.value = ''
+  editCode.value = ''
+}
+
+async function submitUpdate() {
+  if (editingId.value == null) {
+    return
+  }
+  const deptName = editName.value.trim()
+  const deptCode = editCode.value.trim()
+  if (!deptName || !deptCode) {
+    editStatus.value = 'error'
+    editMessage.value = '部门名称和编码都不能为空。'
+    return
+  }
+
+  savingEdit.value = true
+  editStatus.value = 'loading'
+  editMessage.value = '正在保存修改…'
+
+  try {
+    const updated = await updateDepartment({
+      id: editingId.value,
+      deptName,
+      deptCode,
+    })
+    cancelEdit()
+    editStatus.value = 'success'
+    editMessage.value = `已修改「${updated.deptName}」。`
+    await loadDepartments()
+  } catch (error: unknown) {
+    editStatus.value = 'error'
+    editMessage.value = describeError(error)
+  } finally {
+    savingEdit.value = false
+  }
+}
+
 function statusLabel(value: number | null): string {
   if (value === 0) {
     return '正常'
@@ -98,7 +152,7 @@ onMounted(loadDepartments)
   <section class="page-card">
     <p class="eyebrow">阶段 4 · 部门管理</p>
     <h1>部门列表</h1>
-    <p>从现有 health 数据库读取部门，也可以新增。名称和编码必填，会写入真实数据库。</p>
+    <p>从现有 health 数据库读取、新增和修改部门。名称和编码必填，会写入真实数据库，建议先改自己新增的测试部门。</p>
 
     <form class="dept-form" @submit.prevent="submitCreate">
       <label>
@@ -154,18 +208,56 @@ onMounted(loadDepartments)
             <th>上级 ID</th>
             <th>状态</th>
             <th>排序</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="department in departments" :key="department.id">
-            <td>{{ department.deptName }}</td>
-            <td>{{ department.deptCode || '-' }}</td>
+            <td>
+              <input
+                v-if="editingId === department.id"
+                v-model="editName"
+                maxlength="100"
+                aria-label="部门名称"
+              >
+              <template v-else>{{ department.deptName }}</template>
+            </td>
+            <td>
+              <input
+                v-if="editingId === department.id"
+                v-model="editCode"
+                maxlength="50"
+                aria-label="部门编码"
+              >
+              <template v-else>{{ department.deptCode || '-' }}</template>
+            </td>
             <td>{{ department.parentId ?? '-' }}</td>
             <td>{{ statusLabel(department.status) }}</td>
             <td>{{ department.sortOrder ?? '-' }}</td>
+            <td class="dept-actions">
+              <template v-if="editingId === department.id">
+                <button type="button" :disabled="savingEdit" @click="submitUpdate">
+                  {{ savingEdit ? '保存中…' : '保存' }}
+                </button>
+                <button type="button" class="button-secondary" :disabled="savingEdit" @click="cancelEdit">
+                  取消
+                </button>
+              </template>
+              <button v-else type="button" class="button-secondary" @click="startEdit(department)">
+                修改
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
+    <p
+      v-if="editMessage"
+      class="request-result"
+      :class="`request-result--${editStatus === 'idle' ? 'loading' : editStatus}`"
+      role="status"
+    >
+      {{ editMessage }}
+    </p>
   </section>
 </template>

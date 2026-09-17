@@ -210,6 +210,36 @@ button:disabled {
   text-align: left;
 }
 
+.dept-table input {
+  width: 100%;
+  min-width: 8rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #cde2dc;
+  border-radius: 0.55rem;
+  color: inherit;
+  background: #f7fbf9;
+  font: inherit;
+}
+
+.dept-actions {
+  white-space: nowrap;
+}
+
+.dept-actions button {
+  margin: 0 0.35rem 0 0;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.9rem;
+}
+
+.button-secondary {
+  color: #2f5f56;
+  background: #eef6f3;
+}
+
+.button-secondary:hover {
+  background: #e1f0ea;
+}
+
 .dept-table th {
   color: #398174;
   font-size: 0.8rem;

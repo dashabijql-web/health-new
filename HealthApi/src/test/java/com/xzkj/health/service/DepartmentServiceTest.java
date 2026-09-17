@@ -74,4 +74,67 @@ class DepartmentServiceTest {
         verify(departmentMapper, never()).insert(any(Department.class));
         assertNull(department.getId());
     }
+
+    @Test
+    void updatesDepartmentWhenIdExists() {
+        Department existing = new Department();
+        existing.setId(21L);
+        existing.setDeptName("学习测试部门");
+        existing.setDeptCode("LEARN01");
+        existing.setStatus(0);
+        existing.setSortOrder(0);
+        when(departmentMapper.selectById(21L)).thenReturn(existing);
+        when(departmentMapper.updateById(existing)).thenReturn(1);
+
+        Department patch = new Department();
+        patch.setId(21L);
+        patch.setDeptName(" 学习测试部门-改 ");
+        patch.setDeptCode(" LEARN01-U ");
+
+        Department updated = departmentService.update(patch);
+
+        assertEquals(21L, updated.getId());
+        assertEquals("学习测试部门-改", updated.getDeptName());
+        assertEquals("LEARN01-U", updated.getDeptCode());
+        assertEquals(0, updated.getStatus());
+        verify(departmentMapper).updateById(existing);
+    }
+
+    @Test
+    void rejectsUpdateWhenDepartmentDoesNotExist() {
+        when(departmentMapper.selectById(99L)).thenReturn(null);
+
+        Department patch = new Department();
+        patch.setId(99L);
+        patch.setDeptName("学习测试部门");
+        patch.setDeptCode("LEARN01");
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> departmentService.update(patch));
+
+        assertEquals("部门不存在", exception.getMessage());
+        verify(departmentMapper, never()).updateById(any(Department.class));
+    }
+
+    @Test
+    void rejectsUpdateWhenNameIsBlank() {
+        Department existing = new Department();
+        existing.setId(21L);
+        existing.setDeptName("学习测试部门");
+        existing.setDeptCode("LEARN01");
+        when(departmentMapper.selectById(21L)).thenReturn(existing);
+
+        Department patch = new Department();
+        patch.setId(21L);
+        patch.setDeptName("  ");
+        patch.setDeptCode("LEARN01");
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> departmentService.update(patch));
+
+        assertEquals("部门名称不能为空", exception.getMessage());
+        verify(departmentMapper, never()).updateById(any(Department.class));
+    }
 }
