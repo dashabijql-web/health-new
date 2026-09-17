@@ -5,6 +5,8 @@ import com.xzkj.health.model.entity.SysUser;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class SysUserService {
     private final SysUserMapper sysUserMapper;
@@ -44,5 +46,13 @@ public class SysUserService {
             throw new IllegalArgumentException("用户不存在");
         }
         return user;
+    }
+
+    public List<String> getRoleCodes(Long userId) {
+        if (userId == null) {
+            return List.of();
+        }
+        List<String> roleCodes = sysUserMapper.findRoleCodes(userId);
+        return roleCodes == null ? List.of() : roleCodes;
     }
 }

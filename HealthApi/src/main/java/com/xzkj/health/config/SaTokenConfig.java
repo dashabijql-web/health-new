@@ -15,7 +15,10 @@ public class SaTokenConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new SaInterceptor(ignored -> {
             String path = SaHolder.getRequest().getRequestPath();
-            if (path.startsWith("/department") || "/auth/info".equals(path)) {
+            String method = SaHolder.getRequest().getMethod();
+            if (AuthPathRules.requiresAdmin(path, method)) {
+                StpUtil.checkRole(AuthPathRules.ADMIN_ROLE);
+            } else if (AuthPathRules.requiresLogin(path)) {
                 StpUtil.checkLogin();
             }
         })).addPathPatterns("/**").excludePathPatterns("/error");

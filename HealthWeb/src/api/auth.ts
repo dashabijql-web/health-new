@@ -9,6 +9,7 @@ export interface LoginResult {
   token: string
   username: string
   name: string
+  roles: string[]
 }
 
 export async function login(payload: LoginPayload): Promise<LoginResult> {

@@ -50,6 +50,7 @@ public class AuthController {
                 ? user.getUsername()
                 : user.getRealName();
         data.put("name", name);
+        data.put("roles", sysUserService.getRoleCodes(user.getId()));
         return data;
     }
 }

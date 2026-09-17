@@ -252,7 +252,9 @@ npm --prefix HealthWeb run build
 
 ## 阶段 5：登录（最小可用）
 
-状态：已完成用户名密码登录、退出，并保护部门接口。角色和权限管理尚未开始。
+状态：已完成用户名密码登录、退出，并按角色保护部门写操作。角色管理页面尚未开始。
+
+认证是确认你是谁（登录）。授权是确认你能干什么（`SUPER_ADMIN` 才能增删改部门）。
 
 ### 旧项目分析
 
@@ -265,7 +267,9 @@ npm --prefix HealthWeb run build
 - 加入 `sa-token-spring-boot3-starter` 和 `spring-security-crypto`。
 - `POST /health/auth/login`、`POST /health/auth/logout`、`GET /health/auth/info`。
 - 未登录访问 `/department/**` 返回 401「请先登录」。
-- 前端：登录页、localStorage 存 Token、Axios 自动带 Token、路由守卫、退出。
+- 部门新增/修改/删除需要角色 `SUPER_ADMIN`，否则 403「没有权限执行该操作」。列表只要登录即可。
+- 角色来自现有表 `sys_user_role`、`sys_role`。当前库里 `admin` 绑定了 `SUPER_ADMIN`。
+- 前端：登录页、localStorage 存 Token 和角色、Axios 自动带 Token、路由守卫、退出。非管理员不显示增删改按钮。
 
 ### 验证
 

@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -74,5 +76,12 @@ class SysUserServiceTest {
                 () -> sysUserService.login("  ", "admin123"));
 
         assertEquals("用户名不能为空", exception.getMessage());
+    }
+
+    @Test
+    void returnsRoleCodesForUser() {
+        when(sysUserMapper.findRoleCodes(1L)).thenReturn(List.of("SUPER_ADMIN"));
+
+        assertEquals(List.of("SUPER_ADMIN"), sysUserService.getRoleCodes(1L));
     }
 }

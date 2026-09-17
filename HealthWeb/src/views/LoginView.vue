@@ -46,7 +46,7 @@ async function submitLogin() {
 
   try {
     const result = await login({ username: name, password: pass })
-    setLogin(result.token, result.name)
+    setLogin(result.token, result.name, result.roles ?? [])
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/departments'
     await router.replace(redirect)
   } catch (caught: unknown) {

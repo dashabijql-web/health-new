@@ -3,6 +3,7 @@ import axios from 'axios'
 import { onMounted, ref } from 'vue'
 
 import { createDepartment, deleteDepartment, fetchDepartmentList, updateDepartment, type Department } from '../api/department'
+import { canManageDepartments } from '../utils/auth'
 
 type RequestStatus = 'idle' | 'loading' | 'success' | 'error'
 
@@ -179,9 +180,11 @@ onMounted(loadDepartments)
   <section class="page-card">
     <p class="eyebrow">阶段 4 · 部门管理</p>
     <h1>部门列表</h1>
-    <p>从现有 health 数据库读取、新增、修改和删除部门。建议只动自己新增的测试部门，不要删综采队等真实数据。</p>
+    <p>
+      登录后可查看部门。只有超级管理员能新增、修改和删除。建议只动自己新增的测试部门，不要删综采队等真实数据。
+    </p>
 
-    <form class="dept-form" @submit.prevent="submitCreate">
+    <form v-if="canManageDepartments" class="dept-form" @submit.prevent="submitCreate">
       <label>
         <span>部门名称</span>
         <input v-model="newDeptName" name="deptName" maxlength="100" placeholder="例如：学习测试部门">
@@ -235,7 +238,7 @@ onMounted(loadDepartments)
             <th>上级 ID</th>
             <th>状态</th>
             <th>排序</th>
-            <th>操作</th>
+            <th v-if="canManageDepartments">操作</th>
           </tr>
         </thead>
         <tbody>
@@ -261,7 +264,7 @@ onMounted(loadDepartments)
             <td>{{ department.parentId ?? '-' }}</td>
             <td>{{ statusLabel(department.status) }}</td>
             <td>{{ department.sortOrder ?? '-' }}</td>
-            <td class="dept-actions">
+            <td v-if="canManageDepartments" class="dept-actions">
               <template v-if="editingId === department.id">
                 <button type="button" :disabled="savingEdit" @click="submitUpdate">
                   {{ savingEdit ? '保存中…' : '保存' }}
