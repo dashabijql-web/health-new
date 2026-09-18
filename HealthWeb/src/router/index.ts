@@ -47,6 +47,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/heart-rate',
+      name: 'heart-rate',
+      component: () => import('../views/HeartRateView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/about',
       name: 'about',
       component: AboutView,

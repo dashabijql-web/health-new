@@ -11,6 +11,7 @@ public final class AuthPathRules {
                 || path.startsWith("/job-type")
                 || path.startsWith("/employee")
                 || path.startsWith("/device")
+                || path.startsWith("/heart-rate")
                 || "/auth/info".equals(path);
     }
 
@@ -18,7 +19,8 @@ public final class AuthPathRules {
         boolean managed = path.startsWith("/department")
                 || path.startsWith("/job-type")
                 || path.startsWith("/employee")
-                || path.startsWith("/device");
+                || path.startsWith("/device")
+                || path.startsWith("/heart-rate");
         if (!managed) {
             return false;
         }

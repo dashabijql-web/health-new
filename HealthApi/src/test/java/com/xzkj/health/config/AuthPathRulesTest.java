@@ -59,6 +59,13 @@ class AuthPathRulesTest {
     }
 
     @Test
+    void heartRateListRequiresLoginButNotAdmin() {
+        assertTrue(AuthPathRules.requiresLogin("/heart-rate/list"));
+        assertFalse(AuthPathRules.requiresAdmin("/heart-rate/list", "GET"));
+        assertTrue(AuthPathRules.requiresAdmin("/heart-rate/create", "POST"));
+    }
+
+    @Test
     void helloDoesNotRequireLogin() {
         assertFalse(AuthPathRules.requiresLogin("/hello"));
         assertFalse(AuthPathRules.requiresAdmin("/hello", "GET"));

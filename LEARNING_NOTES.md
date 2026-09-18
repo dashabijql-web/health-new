@@ -307,6 +307,15 @@ npm --prefix HealthWeb run type-check
 - IMEI 必须 15 位数字且唯一；已绑定职工的设备不能删除。
 - 绑定写入 `device_user`：`POST /device/{id}/bind`，按工号找人。解绑把 `is_current` 设为 0。一台设备、一个职工都只能有一条当前绑定。
 
+## 阶段 7：心率
+
+状态：已完成按工号查询、分页、趋势图，以及写入一条心率。
+
+- 不新建表，读取现有 `v_health_record`。`user_code` 在库里是工号，例如 EMP0001。
+- 写入当前月份分区表 `health_record_yyyyMM`。
+- 接口：`GET /heart-rate/list`、`GET /heart-rate/trend`、`POST /heart-rate/create`。
+- 前端：`src/views/HeartRateView.vue`，ECharts 折线图，最多 200 个点。
+
 真实数据库查询：
 
 - `GET /health/actuator/health`：`{"status":"UP"}`

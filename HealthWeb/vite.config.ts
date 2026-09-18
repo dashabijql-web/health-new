@@ -6,6 +6,10 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [vue()],
+    optimizeDeps: {
+      include: ['vue', 'vue-router', 'axios'],
+      exclude: ['echarts'],
+    },
     server: {
       host: '127.0.0.1',
       port: 5173,
