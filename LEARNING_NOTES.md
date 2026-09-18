@@ -372,3 +372,49 @@ mvn spring-boot:run
 - `npm run build`：通过。
 - 临时启动当前版本并查询真实数据库：`EMP0001` 列表返回 3328 条血氧记录，趋势接口返回真实记录。
 - 验证使用的临时 8082 服务已停止；原有 8081 服务未停止。
+
+## 阶段 8：体温（第三步）
+
+状态：已完成按工号查询、分页、趋势图，以及写入一条体温。
+
+- 复用现有 `v_health_record` 视图中的 `temperature` 字段；数据库保存实际温度乘以 10 的整数，例如 `367` 表示 `36.7℃`，不新建表。
+- 写入当前月份分区表 `health_record_yyyyMM`，读取时转换为一位小数的摄氏温度。
+- 后端调用链：`TemperatureController → TemperatureService → TemperatureMapper → v_health_record / health_record_yyyyMM`。
+- 接口：`GET /temperature/list`、`GET /temperature/trend`、`POST /temperature/create`。
+- 前端：`src/api/temperature.ts`、`src/views/TemperatureView.vue`、路由 `/temperature`，ECharts 展示体温趋势，单位为 `℃`。
+- 体温页面和接口需要登录；写入接口需要 `SUPER_ADMIN` 角色。
+- 写入校验：工号必须存在，体温范围为 `35.0℃` 到 `42.0℃`；写入时按一位小数四舍五入为数据库整数。
+
+## 阶段 8：压力（第四步）
+
+状态：已完成按工号查询、分页、趋势图，以及写入一条压力指数。
+
+- 复用现有 `v_health_record` 视图中的 `pressure` 字段，不新建表；旧项目约定压力指数范围为 30–100，70 以上表示偏高。
+- 写入当前月份分区表 `health_record_yyyyMM`。
+- 后端调用链：`PressureController → PressureService → PressureMapper → v_health_record / health_record_yyyyMM`。
+- 接口：`GET /pressure/list`、`GET /pressure/trend`、`POST /pressure/create`。
+- 前端：`src/api/pressure.ts`、`src/views/PressureView.vue`、路由 `/pressure`，ECharts 展示压力指数趋势。
+- 压力页面和接口需要登录；写入接口需要 `SUPER_ADMIN` 角色；写入校验范围为 30–100。
+
+## 阶段 8：睡眠（第五步）
+
+状态：已完成按工号查询、分页、趋势图，以及写入一条睡眠记录。
+
+- 复用现有 `v_health_record` 视图中的 `sleep_minutes` 字段，单位为分钟，不新建表。
+- 写入当前月份分区表 `health_record_yyyyMM`；查询过滤 1–1439 分钟，避免把无效值或超过 24 小时的占位值当作睡眠记录。
+- 后端调用链：`SleepController → SleepService → SleepMapper → v_health_record / health_record_yyyyMM`。
+- 接口：`GET /sleep/list`、`GET /sleep/trend`、`POST /sleep/create`。
+- 前端：`src/api/sleep.ts`、`src/views/SleepView.vue`、路由 `/sleep`，表格显示分钟和小时，ECharts 以小时展示趋势。
+- 睡眠页面和接口需要登录；写入接口需要 `SUPER_ADMIN` 角色；写入校验范围为 1–1439 分钟。
+
+### 三种指标的共同点与差异
+
+- 共同点：都按工号和日期范围查询，后端分页，趋势接口最多返回 200 个点，写入当前月份分区表，并通过登录/管理员权限保护。
+- 差异：体温需要在数据库整数和摄氏小数之间换算；压力直接使用 30–100 的指数；睡眠以分钟存储、前端以小时绘图。
+
+### 验证结果
+
+- `mvn -q test -f HealthApi/pom.xml`：通过。
+- `npm --prefix HealthWeb run type-check`：通过。
+- `npm --prefix HealthWeb run build`：通过（Vite 仅提示现有 ECharts bundle 较大和既有动态导入提示）。
+- 自动化测试覆盖正常列表、空列表响应和非法写入错误；测试使用 Mock，不修改共享数据库。

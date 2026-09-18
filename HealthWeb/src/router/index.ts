@@ -65,6 +65,24 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/temperature',
+      name: 'temperature',
+      component: () => import('../views/TemperatureView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/pressure',
+      name: 'pressure',
+      component: () => import('../views/PressureView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/sleep',
+      name: 'sleep',
+      component: () => import('../views/SleepView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/about',
       name: 'about',
       component: AboutView,

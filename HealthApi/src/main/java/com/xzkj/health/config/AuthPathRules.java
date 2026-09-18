@@ -14,6 +14,9 @@ public final class AuthPathRules {
                 || path.startsWith("/heart-rate")
                 || path.startsWith("/blood-pressure")
                 || path.startsWith("/blood-oxygen")
+                || path.startsWith("/temperature")
+                || path.startsWith("/pressure")
+                || path.startsWith("/sleep")
                 || "/auth/info".equals(path);
     }
 
@@ -24,7 +27,10 @@ public final class AuthPathRules {
                 || path.startsWith("/device")
                 || path.startsWith("/heart-rate")
                 || path.startsWith("/blood-pressure")
-                || path.startsWith("/blood-oxygen");
+                || path.startsWith("/blood-oxygen")
+                || path.startsWith("/temperature")
+                || path.startsWith("/pressure")
+                || path.startsWith("/sleep");
         if (!managed) {
             return false;
         }

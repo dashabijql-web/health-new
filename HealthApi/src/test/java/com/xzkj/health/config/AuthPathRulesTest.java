@@ -80,6 +80,27 @@ class AuthPathRulesTest {
     }
 
     @Test
+    void temperatureListRequiresLoginButNotAdmin() {
+        assertTrue(AuthPathRules.requiresLogin("/temperature/list"));
+        assertFalse(AuthPathRules.requiresAdmin("/temperature/list", "GET"));
+        assertTrue(AuthPathRules.requiresAdmin("/temperature/create", "POST"));
+    }
+
+    @Test
+    void pressureListRequiresLoginButNotAdmin() {
+        assertTrue(AuthPathRules.requiresLogin("/pressure/list"));
+        assertFalse(AuthPathRules.requiresAdmin("/pressure/list", "GET"));
+        assertTrue(AuthPathRules.requiresAdmin("/pressure/create", "POST"));
+    }
+
+    @Test
+    void sleepListRequiresLoginButNotAdmin() {
+        assertTrue(AuthPathRules.requiresLogin("/sleep/list"));
+        assertFalse(AuthPathRules.requiresAdmin("/sleep/list", "GET"));
+        assertTrue(AuthPathRules.requiresAdmin("/sleep/create", "POST"));
+    }
+
+    @Test
     void helloDoesNotRequireLogin() {
         assertFalse(AuthPathRules.requiresLogin("/hello"));
         assertFalse(AuthPathRules.requiresAdmin("/hello", "GET"));

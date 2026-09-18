@@ -31,6 +31,9 @@ async function logout() {
         <RouterLink to="/heart-rate">心率</RouterLink>
         <RouterLink to="/blood-pressure">血压</RouterLink>
         <RouterLink to="/blood-oxygen">血氧</RouterLink>
+        <RouterLink to="/temperature">体温</RouterLink>
+        <RouterLink to="/pressure">压力</RouterLink>
+        <RouterLink to="/sleep">睡眠</RouterLink>
         <RouterLink to="/about">关于</RouterLink>
         <RouterLink v-if="!token" to="/login">登录</RouterLink>
         <button v-else type="button" class="link-button" @click="logout">
