@@ -12,6 +12,7 @@ public final class AuthPathRules {
                 || path.startsWith("/employee")
                 || path.startsWith("/device")
                 || path.startsWith("/heart-rate")
+                || path.startsWith("/blood-pressure")
                 || "/auth/info".equals(path);
     }
 
@@ -20,7 +21,8 @@ public final class AuthPathRules {
                 || path.startsWith("/job-type")
                 || path.startsWith("/employee")
                 || path.startsWith("/device")
-                || path.startsWith("/heart-rate");
+                || path.startsWith("/heart-rate")
+                || path.startsWith("/blood-pressure");
         if (!managed) {
             return false;
         }

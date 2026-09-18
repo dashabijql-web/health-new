@@ -331,3 +331,24 @@ mvn spring-boot:run
 ```
 
 改数据库账号密码时，只改 `application.yml`。IDEA 里直接启动即可，不用配环境变量。
+
+## 阶段 8：血压（第一步）
+
+状态：已完成按工号查询、分页、趋势图，以及写入一条血压。
+
+- 复用现有 `v_health_record` 视图中的 `blood_pressure_high`（收缩压）和 `blood_pressure_low`（舒张压）字段，不新建表。
+- 写入当前月份分区表 `health_record_yyyyMM`，自动化测试使用 Mock，不修改共享数据库。
+- 后端调用链：`BloodPressureController → BloodPressureService → BloodPressureMapper → v_health_record / health_record_yyyyMM`。
+- 接口：`GET /blood-pressure/list`、`GET /blood-pressure/trend`、`POST /blood-pressure/create`。
+- 前端：`src/api/bloodPressure.ts`、`src/views/BloodPressureView.vue`、路由 `/blood-pressure`，页面使用 ECharts 同时绘制收缩压和舒张压。
+- 血压页面和接口需要登录；写入接口需要 `SUPER_ADMIN` 角色。
+- 写入校验：工号必须存在；收缩压范围为 40 到 300，舒张压范围为 20 到 200，且收缩压必须高于舒张压。
+
+### 验证结果
+
+- `mvn -q test`：通过。
+- `npm run type-check`：通过。
+- `npm run build`：通过。
+- 临时启动当前版本并查询真实数据库：`EMP0001` 列表返回 6510 条血压记录，趋势接口返回真实记录。
+- 未登录访问 `/blood-pressure/list`：返回 HTTP 401。
+- 验证使用的临时 8082、8083 服务已停止；原有 8081 服务未停止。

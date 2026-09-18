@@ -305,6 +305,12 @@ button:disabled {
   margin-top: 1.25rem;
 }
 
+.bp-chart {
+  width: 100%;
+  height: 20rem;
+  margin-top: 1.25rem;
+}
+
 .pager {
   display: flex;
   flex-wrap: wrap;

@@ -53,6 +53,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/blood-pressure',
+      name: 'blood-pressure',
+      component: () => import('../views/BloodPressureView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/about',
       name: 'about',
       component: AboutView,
