@@ -352,3 +352,23 @@ mvn spring-boot:run
 - 临时启动当前版本并查询真实数据库：`EMP0001` 列表返回 6510 条血压记录，趋势接口返回真实记录。
 - 未登录访问 `/blood-pressure/list`：返回 HTTP 401。
 - 验证使用的临时 8082、8083 服务已停止；原有 8081 服务未停止。
+
+## 阶段 8：血氧（第二步）
+
+状态：已完成按工号查询、分页、趋势图，以及写入一条血氧。
+
+- 复用现有 `v_health_record` 视图中的 `blood_oxygen` 字段，单位为百分比，不新建表。
+- 写入当前月份分区表 `health_record_yyyyMM`，自动化测试使用 Mock，不修改共享数据库。
+- 后端调用链：`BloodOxygenController → BloodOxygenService → BloodOxygenMapper → v_health_record / health_record_yyyyMM`。
+- 接口：`GET /blood-oxygen/list`、`GET /blood-oxygen/trend`、`POST /blood-oxygen/create`。
+- 前端：`src/api/bloodOxygen.ts`、`src/views/BloodOxygenView.vue`、路由 `/blood-oxygen`，页面使用 ECharts 绘制血氧趋势。
+- 血氧页面和接口需要登录；写入接口需要 `SUPER_ADMIN` 角色。
+- 写入校验：工号必须存在，血氧范围为 50 到 100。
+
+### 验证结果
+
+- `mvn -q test`：通过。
+- `npm run type-check`：通过。
+- `npm run build`：通过。
+- 临时启动当前版本并查询真实数据库：`EMP0001` 列表返回 3328 条血氧记录，趋势接口返回真实记录。
+- 验证使用的临时 8082 服务已停止；原有 8081 服务未停止。

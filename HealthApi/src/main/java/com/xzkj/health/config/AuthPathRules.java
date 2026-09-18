@@ -13,6 +13,7 @@ public final class AuthPathRules {
                 || path.startsWith("/device")
                 || path.startsWith("/heart-rate")
                 || path.startsWith("/blood-pressure")
+                || path.startsWith("/blood-oxygen")
                 || "/auth/info".equals(path);
     }
 
@@ -22,7 +23,8 @@ public final class AuthPathRules {
                 || path.startsWith("/employee")
                 || path.startsWith("/device")
                 || path.startsWith("/heart-rate")
-                || path.startsWith("/blood-pressure");
+                || path.startsWith("/blood-pressure")
+                || path.startsWith("/blood-oxygen");
         if (!managed) {
             return false;
         }

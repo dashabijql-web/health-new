@@ -73,6 +73,13 @@ class AuthPathRulesTest {
     }
 
     @Test
+    void bloodOxygenListRequiresLoginButNotAdmin() {
+        assertTrue(AuthPathRules.requiresLogin("/blood-oxygen/list"));
+        assertFalse(AuthPathRules.requiresAdmin("/blood-oxygen/list", "GET"));
+        assertTrue(AuthPathRules.requiresAdmin("/blood-oxygen/create", "POST"));
+    }
+
+    @Test
     void helloDoesNotRequireLogin() {
         assertFalse(AuthPathRules.requiresLogin("/hello"));
         assertFalse(AuthPathRules.requiresAdmin("/hello", "GET"));
