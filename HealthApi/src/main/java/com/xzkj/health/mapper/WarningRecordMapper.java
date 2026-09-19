@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -91,4 +92,15 @@ public interface WarningRecordMapper {
     })
     WarningRecordView findDetail(@Param("id") Long id,
                                  @Param("createTime") String createTime);
+
+    @Update({
+            "UPDATE ${tableName} SET is_handled = 1, handle_time = GETDATE(),",
+            "handle_by = #{operator}, remark = #{remark}",
+            "WHERE id = #{id} AND create_time = CONVERT(datetime, #{createTime}, 120) AND is_handled = 0"
+    })
+    int markHandled(@Param("tableName") String tableName,
+                    @Param("id") Long id,
+                    @Param("createTime") String createTime,
+                    @Param("operator") String operator,
+                    @Param("remark") String remark);
 }

@@ -37,6 +37,34 @@ export interface WarningFilters {
   size?: number
 }
 
+export interface WarningIncidentState {
+  warningId: number
+  occurredAt: string
+  status: 'NEW' | 'ACKED' | 'RESOLVED' | 'CLOSED' | 'FALSE_ALARM'
+  ownerUserId: number | null
+  ownerName: string | null
+  ownerDept: string | null
+  slaDueAt: string | null
+  slaMinutes: number | null
+  updatedAt: string | null
+}
+
+export interface WarningActionRequest {
+  occurredAt: string
+  remark?: string
+  ownerUserId?: number
+  slaMinutes?: number
+}
+
+export interface WarningActionResult {
+  actionId: string
+  action: string
+  message: string
+  incident: WarningIncidentState
+}
+
+export type WarningAction = 'ack' | 'assign' | 'resolve' | 'close' | 'false-alarm'
+
 export async function fetchWarningList(filters: WarningFilters): Promise<WarningPage> {
   const response = await request.get<WarningPage>('/warning/list', { params: filters })
   return response.data
@@ -46,5 +74,21 @@ export async function fetchWarningDetail(id: number, createTime: string): Promis
   const response = await request.get<WarningRecord>(`/warning/detail/${id}`, {
     params: { createTime },
   })
+  return response.data
+}
+
+export async function fetchWarningState(id: number, occurredAt: string): Promise<WarningIncidentState> {
+  const response = await request.get<WarningIncidentState>(`/warning/state/${id}`, {
+    params: { occurredAt },
+  })
+  return response.data
+}
+
+export async function updateWarningState(
+  id: number,
+  action: WarningAction,
+  payload: WarningActionRequest,
+): Promise<WarningActionResult> {
+  const response = await request.put<WarningActionResult>(`/warning/${id}/${action}`, payload)
   return response.data
 }

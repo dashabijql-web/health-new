@@ -557,3 +557,27 @@ npm --prefix HealthWeb run build
 - 后端测试覆盖分页、筛选校验、单页上限、复合键详情和不存在记录。
 - `mvn -q test -f HealthApi/pom.xml`、`npm run type-check` 和 `npm run build` 均通过。
 - 真实 `health` 数据库只读验证：高危健康阈值筛选返回 10289 条，使用首条记录的 `id=1044` 与 `createTime=2026-09-14 00:10:00` 成功读取同一详情；未修改数据库。
+
+## 阶段 9：预警处置生命周期（第七步）
+
+状态：已完成确认、分派、处理、关闭和误报操作；直接复用老数据库已有处置表，不新增表、不执行数据库迁移。
+
+### 数据复用与状态规则
+
+- 处置主状态写入既有 `command_center_incident`，每次操作写入既有 `command_center_incident_action`；两表均使用 `warning_id + occurred_at` 关联跨月预警记录。
+- 状态流转为 `NEW -> ACKED -> RESOLVED -> CLOSED`；误报从 `NEW` 或 `ACKED` 进入终态 `FALSE_ALARM`。
+- 分派允许在 `NEW` 或 `ACKED` 状态执行，保存责任人和 1～1440 分钟 SLA，并将状态保持为 `ACKED`。
+- 处理和误报同时更新对应 `warning_record_YYYYMM.is_handled`、处理人、处理时间和备注，兼容老系统已有的“是否处理”查询。
+- 查询处置状态时，如果老预警还没有事件行，只根据 `is_handled` 派生 `NEW` 或 `RESOLVED`，不因只读查询创建数据。
+
+### 接口与页面
+
+- `GET /warning/state/{id}` 读取处置状态；五个 `PUT` 接口分别执行确认、分派、处理、关闭和误报。
+- 所有动作继续使用预警 ID 和发生时间复合定位；修改接口仅超级管理员可调用。
+- 页面按当前状态显示可用操作，分派时填写责任人用户 ID 和 SLA，误报要求填写原因。
+- 操作成功后重新读取列表、详情和事件状态，不依赖前端本地修改伪造成功状态。
+
+### 验证
+
+- Service 测试覆盖初始状态、确认、分派、处理兼容写入、关闭状态限制和误报原因校验；Controller 测试覆盖动作接口和缺少发生时间的错误响应。
+- 自动化测试全部使用 Mock，不写真实数据库；真实 `health` 数据库仅只读确认两张处置表和所需字段已经存在。

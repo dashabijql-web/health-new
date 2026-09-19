@@ -478,6 +478,34 @@ button:disabled {
   white-space: pre-wrap;
 }
 
+.warning-actions {
+  margin: 1.25rem 0;
+  padding: 1rem;
+  border: 1px solid #cde2dc;
+  border-radius: 0.8rem;
+}
+
+.warning-action-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.warning-action-fields label,
+.warning-action-remark {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.warning-action-remark {
+  margin-top: 0.75rem;
+}
+
+.warning-action-buttons {
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
 @media (max-width: 900px) {
   .warning-filters,
   .warning-detail dl {
@@ -487,7 +515,8 @@ button:disabled {
 
 @media (max-width: 560px) {
   .warning-filters,
-  .warning-detail dl {
+  .warning-detail dl,
+  .warning-action-fields {
     grid-template-columns: 1fr;
   }
 }

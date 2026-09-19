@@ -120,6 +120,9 @@ class AuthPathRulesTest {
         assertTrue(AuthPathRules.requiresAdmin("/warning/generate", "POST"));
         assertTrue(AuthPathRules.requiresLogin("/warning/classifications"));
         assertFalse(AuthPathRules.requiresAdmin("/warning/classifications", "GET"));
+        assertTrue(AuthPathRules.requiresLogin("/warning/1046/resolve"));
+        assertTrue(AuthPathRules.requiresAdmin("/warning/1046/resolve", "PUT"));
+        assertFalse(AuthPathRules.requiresAdmin("/warning/state/1046", "GET"));
     }
 
     @Test

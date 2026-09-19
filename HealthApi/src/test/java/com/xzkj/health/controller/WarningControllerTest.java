@@ -6,10 +6,13 @@ import com.xzkj.health.model.dto.WarningCodeCatalogItem;
 import com.xzkj.health.model.dto.WarningSourceCatalog;
 import com.xzkj.health.model.dto.WarningRecordPage;
 import com.xzkj.health.model.dto.WarningRecordView;
+import com.xzkj.health.model.dto.WarningActionResult;
+import com.xzkj.health.model.dto.WarningIncidentState;
 import com.xzkj.health.model.entity.WarningRecord;
 import com.xzkj.health.service.HealthWarningService;
 import com.xzkj.health.service.WarningClassificationService;
 import com.xzkj.health.service.WarningQueryService;
+import com.xzkj.health.service.WarningLifecycleService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -25,6 +28,7 @@ import java.util.List;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,6 +47,9 @@ class WarningControllerTest {
 
     @MockBean
     WarningQueryService warningQueryService;
+
+    @MockBean
+    WarningLifecycleService warningLifecycleService;
 
     @Test
     void returnsWarningList() throws Exception {
@@ -110,5 +117,30 @@ class WarningControllerTest {
                 .andExpect(jsonPath("$.warning.eventSource").value("HEALTH_THRESHOLD"))
                 .andExpect(jsonPath("$.warning.eventCode").value("HEART_RATE"))
                 .andExpect(jsonPath("$.warning.warningLevel").value("高危"));
+    }
+
+    @Test
+    void acknowledgesWarningIncident() throws Exception {
+        WarningIncidentState state = new WarningIncidentState();
+        state.setWarningId(7L);
+        state.setStatus("ACKED");
+        given(warningLifecycleService.acknowledge(7L, "2026-08-01 08:30:00", "已查看"))
+                .willReturn(new WarningActionResult("action-1", "ACK", "事件已确认", state));
+
+        mockMvc.perform(put("/warning/7/ack")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"occurredAt\":\"2026-08-01 08:30:00\",\"remark\":\"已查看\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.action").value("ACK"))
+                .andExpect(jsonPath("$.incident.status").value("ACKED"));
+    }
+
+    @Test
+    void rejectsActionWithoutOccurredAt() throws Exception {
+        mockMvc.perform(put("/warning/7/resolve")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("预警发生时间不能为空"));
     }
 }
