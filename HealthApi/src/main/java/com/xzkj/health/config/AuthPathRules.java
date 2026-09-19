@@ -18,6 +18,7 @@ public final class AuthPathRules {
                 || path.startsWith("/pressure")
                 || path.startsWith("/sleep")
                 || path.startsWith("/alert-config")
+                || path.startsWith("/warning")
                 || "/auth/info".equals(path);
     }
 
@@ -35,7 +36,8 @@ public final class AuthPathRules {
                 || path.startsWith("/temperature")
                 || path.startsWith("/pressure")
                 || path.startsWith("/sleep")
-                || path.startsWith("/alert-config");
+                || path.startsWith("/alert-config")
+                || path.startsWith("/warning");
         if (!managed) {
             return false;
         }

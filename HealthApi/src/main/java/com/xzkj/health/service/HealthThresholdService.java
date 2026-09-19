@@ -21,6 +21,17 @@ public class HealthThresholdService {
         }
 
         EffectiveAlertConfig effective = alertConfigService.effective(empCode, configType);
+        return evaluate(effective, configType, value);
+    }
+
+    public HealthThresholdEvaluation evaluate(EffectiveAlertConfig effective, Integer configType,
+                                              BigDecimal value) {
+        if (value == null) {
+            throw new IllegalArgumentException("指标值不能为空");
+        }
+        if (effective == null || effective.getConfig() == null) {
+            throw new IllegalArgumentException("有效阈值配置不能为空");
+        }
         AlertConfig config = effective.getConfig();
         requireCompleteThresholds(config);
 

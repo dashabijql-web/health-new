@@ -115,6 +115,12 @@ class AuthPathRulesTest {
     }
 
     @Test
+    void warningGenerationRequiresLoginAndAdmin() {
+        assertTrue(AuthPathRules.requiresLogin("/warning/generate"));
+        assertTrue(AuthPathRules.requiresAdmin("/warning/generate", "POST"));
+    }
+
+    @Test
     void helloDoesNotRequireLogin() {
         assertFalse(AuthPathRules.requiresLogin("/hello"));
         assertFalse(AuthPathRules.requiresAdmin("/hello", "GET"));
