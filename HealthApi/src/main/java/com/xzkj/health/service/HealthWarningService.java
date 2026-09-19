@@ -8,6 +8,8 @@ import com.xzkj.health.model.dto.HealthThresholdEvaluation;
 import com.xzkj.health.model.dto.WarningGenerationResult;
 import com.xzkj.health.model.entity.AlertConfig;
 import com.xzkj.health.model.entity.WarningRecord;
+import com.xzkj.health.model.enums.WarningEventCode;
+import com.xzkj.health.model.enums.WarningEventSource;
 import com.xzkj.health.util.TableNameUtil;
 import org.springframework.stereotype.Service;
 
@@ -21,15 +23,18 @@ public class HealthWarningService {
     private final HealthThresholdService healthThresholdService;
     private final AlertConfigService alertConfigService;
     private final WarningRecordMapper warningRecordMapper;
+    private final WarningClassificationService warningClassificationService;
     private final ObjectMapper objectMapper;
 
     public HealthWarningService(HealthThresholdService healthThresholdService,
                                 AlertConfigService alertConfigService,
                                 WarningRecordMapper warningRecordMapper,
+                                WarningClassificationService warningClassificationService,
                                 ObjectMapper objectMapper) {
         this.healthThresholdService = healthThresholdService;
         this.alertConfigService = alertConfigService;
         this.warningRecordMapper = warningRecordMapper;
+        this.warningClassificationService = warningClassificationService;
         this.objectMapper = objectMapper;
     }
 
@@ -45,6 +50,7 @@ public class HealthWarningService {
         }
 
         WarningRecord warning = buildWarning(evaluation, effective);
+        warningClassificationService.validate(warning);
         String tableName = TableNameUtil.warningRecordTable(warning.getCreateTime());
         int rows = warningRecordMapper.insertToTable(tableName, warning);
         if (rows != 1) {
@@ -61,7 +67,7 @@ public class HealthWarningService {
         warning.setIndicatorName(evaluation.getConfigName());
         warning.setIndicatorValue(formatValue(evaluation.getValue(), evaluation.getUnit()));
         warning.setWarningLevel(severityLabel(evaluation.getSeverity()));
-        warning.setEventSource("HEALTH_THRESHOLD");
+        warning.setEventSource(WarningEventSource.HEALTH_THRESHOLD.name());
         warning.setEventCode(eventCode(evaluation.getConfigType()));
         warning.setThresholdSnapshot(thresholdSnapshot(effective));
         warning.setHandled(false);
@@ -110,12 +116,12 @@ public class HealthWarningService {
 
     private String eventCode(Integer configType) {
         return switch (configType) {
-            case 1 -> "HEART_RATE";
-            case 2 -> "BLOOD_OXYGEN";
-            case 3 -> "TEMPERATURE";
-            case 4 -> "SYSTOLIC_PRESSURE";
-            case 5 -> "PRESSURE_INDEX";
-            default -> "HEALTH_METRIC_" + configType;
+            case 1 -> WarningEventCode.HEART_RATE.name();
+            case 2 -> WarningEventCode.BLOOD_OXYGEN.name();
+            case 3 -> WarningEventCode.TEMPERATURE.name();
+            case 4 -> WarningEventCode.SYSTOLIC_PRESSURE.name();
+            case 5 -> WarningEventCode.PRESSURE_INDEX.name();
+            default -> throw new IllegalArgumentException("指标类型没有对应的健康事件代码");
         };
     }
 }

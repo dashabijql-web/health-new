@@ -37,13 +37,16 @@ class HealthWarningServiceTest {
     AlertConfigService alertConfigService;
     @Mock
     WarningRecordMapper warningRecordMapper;
+    @Mock
+    WarningClassificationService warningClassificationService;
 
     HealthWarningService healthWarningService;
 
     @BeforeEach
     void setUp() {
         healthWarningService = new HealthWarningService(
-                healthThresholdService, alertConfigService, warningRecordMapper, new ObjectMapper());
+                healthThresholdService, alertConfigService, warningRecordMapper,
+                warningClassificationService, new ObjectMapper());
     }
 
     @Test
@@ -87,6 +90,7 @@ class HealthWarningServiceTest {
         assertFalse(result.getWarning().getHandled());
         assertTrue(result.getWarning().getThresholdSnapshot().contains("\"configId\":21"));
         assertTrue(result.getWarning().getThresholdSnapshot().contains("\"employeeRiskLevel\":3"));
+        verify(warningClassificationService).validate(result.getWarning());
 
         ArgumentCaptor<String> tableCaptor = ArgumentCaptor.forClass(String.class);
         verify(warningRecordMapper).insertToTable(tableCaptor.capture(), any(WarningRecord.class));

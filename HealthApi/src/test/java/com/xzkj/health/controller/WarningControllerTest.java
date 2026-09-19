@@ -2,8 +2,11 @@ package com.xzkj.health.controller;
 
 import com.xzkj.health.model.dto.HealthThresholdEvaluation;
 import com.xzkj.health.model.dto.WarningGenerationResult;
+import com.xzkj.health.model.dto.WarningCodeCatalogItem;
+import com.xzkj.health.model.dto.WarningSourceCatalog;
 import com.xzkj.health.model.entity.WarningRecord;
 import com.xzkj.health.service.HealthWarningService;
+import com.xzkj.health.service.WarningClassificationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -14,9 +17,11 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -29,6 +34,21 @@ class WarningControllerTest {
 
     @MockBean
     HealthWarningService healthWarningService;
+
+    @MockBean
+    WarningClassificationService warningClassificationService;
+
+    @Test
+    void returnsWarningClassificationCatalog() throws Exception {
+        given(warningClassificationService.catalog()).willReturn(List.of(
+                new WarningSourceCatalog("DEVICE_ALARM", "设备报警",
+                        List.of(new WarningCodeCatalogItem("SOS", "主动求救")))));
+
+        mockMvc.perform(get("/warning/classifications"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].source").value("DEVICE_ALARM"))
+                .andExpect(jsonPath("$[0].codes[0].code").value("SOS"));
+    }
 
     @Test
     void generatesStructuredWarning() throws Exception {
