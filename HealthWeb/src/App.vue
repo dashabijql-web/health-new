@@ -35,6 +35,7 @@ async function logout() {
         <RouterLink to="/pressure">压力</RouterLink>
         <RouterLink to="/sleep">睡眠</RouterLink>
         <RouterLink to="/alert-config">阈值</RouterLink>
+        <RouterLink to="/warnings">预警</RouterLink>
         <RouterLink to="/about">关于</RouterLink>
         <RouterLink v-if="!token" to="/login">登录</RouterLink>
         <button v-else type="button" class="link-button" @click="logout">

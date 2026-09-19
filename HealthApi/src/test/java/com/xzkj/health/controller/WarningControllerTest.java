@@ -4,9 +4,12 @@ import com.xzkj.health.model.dto.HealthThresholdEvaluation;
 import com.xzkj.health.model.dto.WarningGenerationResult;
 import com.xzkj.health.model.dto.WarningCodeCatalogItem;
 import com.xzkj.health.model.dto.WarningSourceCatalog;
+import com.xzkj.health.model.dto.WarningRecordPage;
+import com.xzkj.health.model.dto.WarningRecordView;
 import com.xzkj.health.model.entity.WarningRecord;
 import com.xzkj.health.service.HealthWarningService;
 import com.xzkj.health.service.WarningClassificationService;
+import com.xzkj.health.service.WarningQueryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -37,6 +40,41 @@ class WarningControllerTest {
 
     @MockBean
     WarningClassificationService warningClassificationService;
+
+    @MockBean
+    WarningQueryService warningQueryService;
+
+    @Test
+    void returnsWarningList() throws Exception {
+        WarningRecordView item = new WarningRecordView();
+        item.setId(1046L);
+        item.setUserCode("EMP0994");
+        item.setEventSource("HEALTH_THRESHOLD");
+        item.setCreateTime("2026-09-15 13:22:23");
+        given(warningQueryService.list(null, null, null, null, null, null, 1, 20))
+                .willReturn(new WarningRecordPage(List.of(item), 1, 1, 20));
+
+        mockMvc.perform(get("/warning/list"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.list[0].id").value(1046))
+                .andExpect(jsonPath("$.list[0].createTime").value("2026-09-15 13:22:23"));
+    }
+
+    @Test
+    void returnsWarningDetailByIdAndCreateTime() throws Exception {
+        WarningRecordView item = new WarningRecordView();
+        item.setId(7L);
+        item.setEventCode("SOS");
+        item.setCreateTime("2026-08-01 08:30:00");
+        given(warningQueryService.detail(7L, "2026-08-01 08:30:00")).willReturn(item);
+
+        mockMvc.perform(get("/warning/detail/7")
+                        .param("createTime", "2026-08-01 08:30:00"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(7))
+                .andExpect(jsonPath("$.eventCode").value("SOS"));
+    }
 
     @Test
     void returnsWarningClassificationCatalog() throws Exception {
