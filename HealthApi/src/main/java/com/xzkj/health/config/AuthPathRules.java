@@ -22,6 +22,9 @@ public final class AuthPathRules {
     }
 
     public static boolean requiresAdmin(String path, String method) {
+        if ("/alert-config/evaluate".equals(path) && "POST".equalsIgnoreCase(method)) {
+            return false;
+        }
         boolean managed = path.startsWith("/department")
                 || path.startsWith("/job-type")
                 || path.startsWith("/employee")

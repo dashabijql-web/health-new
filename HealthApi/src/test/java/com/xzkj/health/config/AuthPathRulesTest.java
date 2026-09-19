@@ -104,6 +104,8 @@ class AuthPathRulesTest {
     void alertConfigListRequiresLoginButNotAdmin() {
         assertTrue(AuthPathRules.requiresLogin("/alert-config/list"));
         assertFalse(AuthPathRules.requiresAdmin("/alert-config/list", "GET"));
+        assertTrue(AuthPathRules.requiresLogin("/alert-config/evaluate"));
+        assertFalse(AuthPathRules.requiresAdmin("/alert-config/evaluate", "POST"));
     }
 
     @Test

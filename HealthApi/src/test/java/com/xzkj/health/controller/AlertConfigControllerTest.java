@@ -2,7 +2,9 @@ package com.xzkj.health.controller;
 
 import com.xzkj.health.model.entity.AlertConfig;
 import com.xzkj.health.model.dto.EffectiveAlertConfig;
+import com.xzkj.health.model.dto.HealthThresholdEvaluation;
 import com.xzkj.health.service.AlertConfigService;
+import com.xzkj.health.service.HealthThresholdService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -19,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,6 +35,9 @@ class AlertConfigControllerTest {
 
     @MockBean
     AlertConfigService alertConfigService;
+
+    @MockBean
+    HealthThresholdService healthThresholdService;
 
     @Test
     void returnsAlertConfigList() throws Exception {
@@ -74,6 +80,36 @@ class AlertConfigControllerTest {
                         .param("configType", "1"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("人员不存在"));
+    }
+
+    @Test
+    void evaluatesHealthValueAgainstEffectiveThreshold() throws Exception {
+        HealthThresholdEvaluation evaluation = new HealthThresholdEvaluation(
+                "EMP0001", 1, 3L, "心率", "bpm", new BigDecimal("151"),
+                "HIGH", "HIGH", true, 2, false);
+        given(healthThresholdService.evaluate("EMP0001", 1, new BigDecimal("151")))
+                .willReturn(evaluation);
+
+        mockMvc.perform(post("/alert-config/evaluate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"empCode\":\"EMP0001\",\"configType\":1,\"value\":151}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.severity").value("HIGH"))
+                .andExpect(jsonPath("$.direction").value("HIGH"))
+                .andExpect(jsonPath("$.outOfRange").value(true))
+                .andExpect(jsonPath("$.configId").value(3));
+    }
+
+    @Test
+    void returnsBadRequestWhenMetricValueIsMissing() throws Exception {
+        given(healthThresholdService.evaluate("EMP0001", 1, null))
+                .willThrow(new IllegalArgumentException("指标值不能为空"));
+
+        mockMvc.perform(post("/alert-config/evaluate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"empCode\":\"EMP0001\",\"configType\":1}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("指标值不能为空"));
     }
 
     @Test
