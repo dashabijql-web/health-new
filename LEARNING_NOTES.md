@@ -418,3 +418,32 @@ mvn spring-boot:run
 - `npm --prefix HealthWeb run type-check`：通过。
 - `npm --prefix HealthWeb run build`：通过（Vite 仅提示现有 ECharts bundle 较大和既有动态导入提示）。
 - 自动化测试覆盖正常列表、空列表响应和非法写入错误；测试使用 Mock，不修改共享数据库。
+
+## 阶段 9：阈值配置（第一步）
+
+状态：已完成阈值配置的读取、修改和启停；越界判断与预警生成尚未开始。
+
+### 旧项目分析
+
+- 旧项目的健康阈值统一存放在 `alert_config` 表中，按 `config_type` 区分指标，按 `risk_level` 区分默认、低风险、中风险和高风险配置。
+- 阈值字段分为正常范围、低侧预警/中危/高危阈值，以及高侧预警/中危/高危阈值。
+- 旧项目的配置接口是 `GET /alert-config/list`、`PUT /alert-config/update` 和 `PUT /alert-config/toggle/{id}`。本阶段沿用这组接口语义，先把配置边界做清楚，后续再把它接入健康数据判断。
+
+### 新项目实现
+
+- 新增 `AlertConfig`、`AlertConfigMapper`、`AlertConfigService` 和 `AlertConfigController`。
+- 列表按指标、默认配置、风险级别和 ID 稳定排序；修改只允许改变阈值数值，不允许通过这个接口改动指标、单位和风险级别。
+- 服务端校验阈值顺序：低侧为“高危 ≤ 中危 ≤ 预警 ≤ 正常下限”，高侧为“正常上限 ≤ 预警 ≤ 中危 ≤ 高危”。空值、逆序和不存在的 ID 都返回 HTTP 400，不写入数据库。
+- `/alert-config/**` 已加入登录和 `SUPER_ADMIN` 写权限规则。普通登录用户可以查看，只有超级管理员可以修改和启停。
+- 前端新增 `/alert-config` 页面和 API，显示现有 20 条配置，可编辑数值并启停配置。页面明确提示：当前步骤不会自动生成预警。
+- 本次只读取并核对了共享数据库中的 `alert_config` 结构，没有执行建表、种子数据或业务数据写入；自动化测试使用 Mock。
+
+### 验证
+
+```bash
+mvn -q test -f HealthApi/pom.xml
+npm --prefix HealthWeb run type-check
+npm --prefix HealthWeb run build
+```
+
+结果：阈值配置 Controller、Service 和权限规则测试通过；前端类型检查和构建通过。提交由用户自行完成。

@@ -271,6 +271,57 @@ button:disabled {
   font: inherit;
 }
 
+.alert-config-table {
+  min-width: 980px;
+}
+
+.alert-config-table td {
+  vertical-align: top;
+}
+
+.config-id {
+  display: block;
+  margin-top: 0.25rem;
+  color: #78918b;
+  font-size: 0.75rem;
+}
+
+.alert-range-inputs {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, 1fr) auto minmax(4.5rem, 1fr);
+  gap: 0.35rem;
+  align-items: center;
+  min-width: 12rem;
+}
+
+.alert-threshold-inputs,
+.alert-threshold-text {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 9rem;
+}
+
+.alert-threshold-inputs label {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(4.5rem, 1fr);
+  gap: 0.35rem;
+  align-items: center;
+  color: #4e6762;
+  font-size: 0.78rem;
+}
+
+.alert-threshold-inputs input,
+.alert-range-inputs input {
+  min-width: 0;
+  padding: 0.45rem 0.55rem;
+}
+
+.alert-threshold-text span {
+  white-space: nowrap;
+  color: #4e6762;
+  font-size: 0.85rem;
+}
+
 .dept-actions {
   white-space: nowrap;
 }
