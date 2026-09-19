@@ -1,7 +1,12 @@
 package com.xzkj.health.service;
 
 import com.xzkj.health.mapper.AlertConfigMapper;
+import com.xzkj.health.mapper.EmployeeMapper;
+import com.xzkj.health.mapper.JobTypeMapper;
+import com.xzkj.health.model.dto.EffectiveAlertConfig;
 import com.xzkj.health.model.entity.AlertConfig;
+import com.xzkj.health.model.entity.Employee;
+import com.xzkj.health.model.entity.JobType;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -11,13 +16,49 @@ import java.util.List;
 @Service
 public class AlertConfigService {
     private final AlertConfigMapper alertConfigMapper;
+    private final EmployeeMapper employeeMapper;
+    private final JobTypeMapper jobTypeMapper;
 
-    public AlertConfigService(AlertConfigMapper alertConfigMapper) {
+    public AlertConfigService(AlertConfigMapper alertConfigMapper,
+                              EmployeeMapper employeeMapper,
+                              JobTypeMapper jobTypeMapper) {
         this.alertConfigMapper = alertConfigMapper;
+        this.employeeMapper = employeeMapper;
+        this.jobTypeMapper = jobTypeMapper;
     }
 
     public List<AlertConfig> list() {
         return alertConfigMapper.findList();
+    }
+
+    public EffectiveAlertConfig effective(String empCode, Integer configType) {
+        String normalizedEmpCode = empCode == null ? "" : empCode.trim();
+        if (normalizedEmpCode.isEmpty()) {
+            throw new IllegalArgumentException("人员编码不能为空");
+        }
+        if (configType == null || configType <= 0) {
+            throw new IllegalArgumentException("指标类型必须为正整数");
+        }
+
+        Employee employee = employeeMapper.findByEmpCode(normalizedEmpCode);
+        if (employee == null) {
+            throw new IllegalArgumentException("人员不存在");
+        }
+
+        Integer employeeRiskLevel = null;
+        if (employee.getJobTypeId() != null) {
+            JobType jobType = jobTypeMapper.selectById(employee.getJobTypeId());
+            if (jobType != null) {
+                employeeRiskLevel = jobType.getRiskLevel();
+            }
+        }
+
+        AlertConfig config = alertConfigMapper.findEffective(configType, employeeRiskLevel);
+        if (config == null) {
+            throw new IllegalArgumentException("未找到已启用的有效阈值配置");
+        }
+        boolean defaultFallback = config.getRiskLevel() == null;
+        return new EffectiveAlertConfig(normalizedEmpCode, employeeRiskLevel, defaultFallback, config);
     }
 
     public AlertConfig update(AlertConfig patch) {

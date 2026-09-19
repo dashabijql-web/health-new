@@ -1,12 +1,14 @@
 package com.xzkj.health.controller;
 
 import com.xzkj.health.model.entity.AlertConfig;
+import com.xzkj.health.model.dto.EffectiveAlertConfig;
 import com.xzkj.health.service.AlertConfigService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -23,6 +25,12 @@ public class AlertConfigController {
     @GetMapping("/list")
     public List<AlertConfig> list() {
         return alertConfigService.list();
+    }
+
+    @GetMapping("/effective")
+    public EffectiveAlertConfig effective(@RequestParam String empCode,
+                                          @RequestParam Integer configType) {
+        return alertConfigService.effective(empCode, configType);
     }
 
     @PutMapping("/update")

@@ -1,7 +1,12 @@
 package com.xzkj.health.service;
 
 import com.xzkj.health.mapper.AlertConfigMapper;
+import com.xzkj.health.mapper.EmployeeMapper;
+import com.xzkj.health.mapper.JobTypeMapper;
+import com.xzkj.health.model.dto.EffectiveAlertConfig;
 import com.xzkj.health.model.entity.AlertConfig;
+import com.xzkj.health.model.entity.Employee;
+import com.xzkj.health.model.entity.JobType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,6 +28,12 @@ class AlertConfigServiceTest {
     @Mock
     AlertConfigMapper alertConfigMapper;
 
+    @Mock
+    EmployeeMapper employeeMapper;
+
+    @Mock
+    JobTypeMapper jobTypeMapper;
+
     @InjectMocks
     AlertConfigService alertConfigService;
 
@@ -33,6 +44,82 @@ class AlertConfigServiceTest {
 
         assertEquals(configs, alertConfigService.list());
         verify(alertConfigMapper).findList();
+    }
+
+    @Test
+    void returnsRiskSpecificEffectiveConfig() {
+        Employee employee = employee(8L);
+        JobType jobType = new JobType();
+        jobType.setRiskLevel(2);
+        AlertConfig config = validConfig();
+        config.setRiskLevel(2);
+        when(employeeMapper.findByEmpCode("EMP0001")).thenReturn(employee);
+        when(jobTypeMapper.selectById(8L)).thenReturn(jobType);
+        when(alertConfigMapper.findEffective(1, 2)).thenReturn(config);
+
+        EffectiveAlertConfig result = alertConfigService.effective(" EMP0001 ", 1);
+
+        assertEquals("EMP0001", result.getEmpCode());
+        assertEquals(2, result.getEmployeeRiskLevel());
+        assertEquals(false, result.isDefaultFallback());
+        assertEquals(config, result.getConfig());
+    }
+
+    @Test
+    void fallsBackToDefaultConfigWhenRiskSpecificConfigIsUnavailable() {
+        Employee employee = employee(8L);
+        JobType jobType = new JobType();
+        jobType.setRiskLevel(3);
+        AlertConfig config = validConfig();
+        config.setRiskLevel(null);
+        when(employeeMapper.findByEmpCode("EMP0002")).thenReturn(employee);
+        when(jobTypeMapper.selectById(8L)).thenReturn(jobType);
+        when(alertConfigMapper.findEffective(4, 3)).thenReturn(config);
+
+        EffectiveAlertConfig result = alertConfigService.effective("EMP0002", 4);
+
+        assertEquals(3, result.getEmployeeRiskLevel());
+        assertEquals(true, result.isDefaultFallback());
+    }
+
+    @Test
+    void usesDefaultConfigWhenEmployeeHasNoJobType() {
+        Employee employee = employee(null);
+        AlertConfig config = validConfig();
+        config.setRiskLevel(null);
+        when(employeeMapper.findByEmpCode("EMP0003")).thenReturn(employee);
+        when(alertConfigMapper.findEffective(2, null)).thenReturn(config);
+
+        EffectiveAlertConfig result = alertConfigService.effective("EMP0003", 2);
+
+        assertEquals(null, result.getEmployeeRiskLevel());
+        assertEquals(true, result.isDefaultFallback());
+        verify(jobTypeMapper, never()).selectById(any());
+    }
+
+    @Test
+    void rejectsMissingEmployee() {
+        when(employeeMapper.findByEmpCode("UNKNOWN")).thenReturn(null);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> alertConfigService.effective("UNKNOWN", 1));
+
+        assertEquals("人员不存在", exception.getMessage());
+        verify(alertConfigMapper, never()).findEffective(any(), any());
+    }
+
+    @Test
+    void rejectsWhenNoEnabledConfigCanBeResolved() {
+        Employee employee = employee(null);
+        when(employeeMapper.findByEmpCode("EMP0004")).thenReturn(employee);
+        when(alertConfigMapper.findEffective(7, null)).thenReturn(null);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> alertConfigService.effective("EMP0004", 7));
+
+        assertEquals("未找到已启用的有效阈值配置", exception.getMessage());
     }
 
     @Test
@@ -129,5 +216,12 @@ class AlertConfigServiceTest {
         config.setCriticalHigh(new BigDecimal("150"));
         config.setEnabled(1);
         return config;
+    }
+
+    private static Employee employee(Long jobTypeId) {
+        Employee employee = new Employee();
+        employee.setEmpCode("EMP0001");
+        employee.setJobTypeId(jobTypeId);
+        return employee;
     }
 }

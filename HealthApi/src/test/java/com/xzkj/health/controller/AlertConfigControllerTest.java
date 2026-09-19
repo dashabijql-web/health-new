@@ -1,6 +1,7 @@
 package com.xzkj.health.controller;
 
 import com.xzkj.health.model.entity.AlertConfig;
+import com.xzkj.health.model.dto.EffectiveAlertConfig;
 import com.xzkj.health.service.AlertConfigService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,36 @@ class AlertConfigControllerTest {
                 .andExpect(jsonPath("$[0].id").value(3))
                 .andExpect(jsonPath("$[0].configName").value("心率"))
                 .andExpect(jsonPath("$[0].normalMin").value(60.0));
+    }
+
+    @Test
+    void returnsEffectiveAlertConfigForEmployeeAndMetric() throws Exception {
+        AlertConfig config = validConfig();
+        config.setId(3L);
+        config.setRiskLevel(2);
+        EffectiveAlertConfig effective = new EffectiveAlertConfig("EMP0001", 2, false, config);
+        given(alertConfigService.effective("EMP0001", 1)).willReturn(effective);
+
+        mockMvc.perform(get("/alert-config/effective")
+                        .param("empCode", "EMP0001")
+                        .param("configType", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.empCode").value("EMP0001"))
+                .andExpect(jsonPath("$.employeeRiskLevel").value(2))
+                .andExpect(jsonPath("$.defaultFallback").value(false))
+                .andExpect(jsonPath("$.config.id").value(3));
+    }
+
+    @Test
+    void returnsBadRequestWhenEffectiveConfigCannotBeResolved() throws Exception {
+        given(alertConfigService.effective("UNKNOWN", 1))
+                .willThrow(new IllegalArgumentException("人员不存在"));
+
+        mockMvc.perform(get("/alert-config/effective")
+                        .param("empCode", "UNKNOWN")
+                        .param("configType", "1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("人员不存在"));
     }
 
     @Test
