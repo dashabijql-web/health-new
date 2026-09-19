@@ -63,6 +63,16 @@ export interface WarningActionResult {
   incident: WarningIncidentState
 }
 
+export interface WarningTimelineItem {
+  actionId: string
+  action: string
+  result: string
+  operator: string
+  target: string | null
+  remark: string | null
+  createdAt: string
+}
+
 export type WarningAction = 'ack' | 'assign' | 'resolve' | 'close' | 'false-alarm'
 
 export async function fetchWarningList(filters: WarningFilters): Promise<WarningPage> {
@@ -79,6 +89,13 @@ export async function fetchWarningDetail(id: number, createTime: string): Promis
 
 export async function fetchWarningState(id: number, occurredAt: string): Promise<WarningIncidentState> {
   const response = await request.get<WarningIncidentState>(`/warning/state/${id}`, {
+    params: { occurredAt },
+  })
+  return response.data
+}
+
+export async function fetchWarningTimeline(id: number, occurredAt: string): Promise<WarningTimelineItem[]> {
+  const response = await request.get<WarningTimelineItem[]>(`/warning/${id}/timeline`, {
     params: { occurredAt },
   })
   return response.data

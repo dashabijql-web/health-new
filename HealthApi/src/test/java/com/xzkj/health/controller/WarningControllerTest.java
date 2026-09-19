@@ -8,6 +8,7 @@ import com.xzkj.health.model.dto.WarningRecordPage;
 import com.xzkj.health.model.dto.WarningRecordView;
 import com.xzkj.health.model.dto.WarningActionResult;
 import com.xzkj.health.model.dto.WarningIncidentState;
+import com.xzkj.health.model.dto.WarningTimelineItem;
 import com.xzkj.health.model.entity.WarningRecord;
 import com.xzkj.health.service.HealthWarningService;
 import com.xzkj.health.service.WarningClassificationService;
@@ -133,6 +134,25 @@ class WarningControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.action").value("ACK"))
                 .andExpect(jsonPath("$.incident.status").value("ACKED"));
+    }
+
+    @Test
+    void returnsWarningTimeline() throws Exception {
+        WarningTimelineItem action = new WarningTimelineItem();
+        action.setActionId("action-1");
+        action.setAction("ASSIGN");
+        action.setOperator("管理员");
+        action.setTarget("王医生");
+        action.setCreatedAt("2026-08-01 08:35:00");
+        given(warningLifecycleService.timeline(7L, "2026-08-01 08:30:00"))
+                .willReturn(List.of(action));
+
+        mockMvc.perform(get("/warning/7/timeline")
+                        .param("occurredAt", "2026-08-01 08:30:00"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].actionId").value("action-1"))
+                .andExpect(jsonPath("$[0].action").value("ASSIGN"))
+                .andExpect(jsonPath("$[0].target").value("王医生"));
     }
 
     @Test

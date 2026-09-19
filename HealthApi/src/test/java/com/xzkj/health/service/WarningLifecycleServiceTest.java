@@ -5,6 +5,7 @@ import com.xzkj.health.mapper.WarningRecordMapper;
 import com.xzkj.health.model.dto.WarningActionResult;
 import com.xzkj.health.model.dto.WarningIncidentState;
 import com.xzkj.health.model.dto.WarningRecordView;
+import com.xzkj.health.model.dto.WarningTimelineItem;
 import com.xzkj.health.model.entity.SysUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class WarningLifecycleServiceTest {
@@ -48,6 +51,23 @@ class WarningLifecycleServiceTest {
 
         assertEquals("NEW", result.getStatus());
         assertEquals(1046L, result.getWarningId());
+    }
+
+    @Test
+    void readsPersistedActionsInTimelineOrder() {
+        WarningTimelineItem action = new WarningTimelineItem();
+        action.setActionId("action-1");
+        action.setAction("ACK");
+        action.setOperator("管理员");
+        action.setCreatedAt("2026-09-15 13:30:00");
+        when(warningIncidentMapper.findTimeline(1046L, OCCURRED_AT)).thenReturn(List.of(action));
+
+        List<WarningTimelineItem> result = service.timeline(1046L, OCCURRED_AT);
+
+        assertEquals(1, result.size());
+        assertEquals("ACK", result.getFirst().getAction());
+        verify(warningQueryService).detail(1046L, OCCURRED_AT);
+        verify(warningIncidentMapper).findTimeline(1046L, OCCURRED_AT);
     }
 
     @Test

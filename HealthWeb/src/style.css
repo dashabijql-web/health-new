@@ -506,6 +506,41 @@ button:disabled {
   flex-wrap: wrap;
 }
 
+.warning-timeline {
+  margin: 1.25rem 0;
+}
+
+.warning-timeline ol {
+  margin: 0;
+  padding-left: 1.4rem;
+  border-left: 2px solid #9fcfc3;
+  list-style: none;
+}
+
+.warning-timeline li {
+  position: relative;
+  display: grid;
+  gap: 0.2rem;
+  padding: 0 0 1rem 0.75rem;
+}
+
+.warning-timeline li::before {
+  position: absolute;
+  top: 0.35rem;
+  left: -1.77rem;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: #287668;
+  content: '';
+}
+
+.warning-timeline span,
+.warning-timeline p {
+  margin: 0;
+  color: #58726c;
+}
+
 @media (max-width: 900px) {
   .warning-filters,
   .warning-detail dl {

@@ -5,6 +5,7 @@ import com.xzkj.health.mapper.WarningRecordMapper;
 import com.xzkj.health.model.dto.WarningActionResult;
 import com.xzkj.health.model.dto.WarningIncidentState;
 import com.xzkj.health.model.dto.WarningRecordView;
+import com.xzkj.health.model.dto.WarningTimelineItem;
 import com.xzkj.health.model.entity.SysUser;
 import com.xzkj.health.util.TableNameUtil;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -41,6 +43,11 @@ public class WarningLifecycleService {
         WarningIncidentState state = warningIncidentMapper.findState(warningId, occurredAt);
         if (state != null) return state;
         return initialState(warning);
+    }
+
+    public List<WarningTimelineItem> timeline(Long warningId, String occurredAt) {
+        warningQueryService.detail(warningId, occurredAt);
+        return warningIncidentMapper.findTimeline(warningId, occurredAt);
     }
 
     @Transactional

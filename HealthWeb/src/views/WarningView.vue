@@ -3,8 +3,8 @@ import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 
 import {
-  fetchWarningDetail, fetchWarningList, fetchWarningState, updateWarningState,
-  type WarningAction, type WarningIncidentState, type WarningRecord,
+  fetchWarningDetail, fetchWarningList, fetchWarningState, fetchWarningTimeline, updateWarningState,
+  type WarningAction, type WarningIncidentState, type WarningRecord, type WarningTimelineItem,
 } from '../api/warning'
 import { canManageDepartments } from '../utils/auth'
 
@@ -22,6 +22,7 @@ const total = ref(0)
 const records = ref<WarningRecord[]>([])
 const selected = ref<WarningRecord | null>(null)
 const incident = ref<WarningIncidentState | null>(null)
+const timeline = ref<WarningTimelineItem[]>([])
 const status = ref<RequestStatus>('idle')
 const message = ref('准备加载预警记录。')
 const detailStatus = ref<RequestStatus>('idle')
@@ -49,6 +50,7 @@ async function loadRecords(resetPage = false) {
   message.value = '正在加载预警记录…'
   selected.value = null
   incident.value = null
+  timeline.value = []
   try {
     const result = await fetchWarningList({
       ...(keyword.value.trim() ? { keyword: keyword.value.trim() } : {}),
@@ -76,12 +78,14 @@ async function openDetail(record: WarningRecord) {
   detailStatus.value = 'loading'
   detailMessage.value = '正在加载详情…'
   try {
-    const [detail, state] = await Promise.all([
+    const [detail, state, actions] = await Promise.all([
       fetchWarningDetail(record.id, record.createTime),
       fetchWarningState(record.id, record.createTime),
+      fetchWarningTimeline(record.id, record.createTime),
     ])
     selected.value = detail
     incident.value = state
+    timeline.value = actions
     ownerUserId.value = state.ownerUserId
     slaMinutes.value = state.slaMinutes ?? 30
     detailStatus.value = 'success'
@@ -89,6 +93,7 @@ async function openDetail(record: WarningRecord) {
   } catch (error: unknown) {
     selected.value = null
     incident.value = null
+    timeline.value = []
     detailStatus.value = 'error'
     detailMessage.value = describeError(error)
   }
@@ -134,7 +139,12 @@ async function runAction(action: WarningAction) {
 function dismissDetail() {
   selected.value = null
   incident.value = null
+  timeline.value = []
   actionMessage.value = ''
+}
+
+function actionLabel(action: string): string {
+  return { ACK: '确认', ASSIGN: '分派', RESOLVE: '处理', CLOSE: '关闭', FALSE_ALARM: '误报' }[action] ?? action
 }
 
 function sourceLabel(source: string): string {
@@ -259,6 +269,17 @@ onMounted(() => loadRecords())
           <button v-if="incident.status === 'NEW' || incident.status === 'ACKED'" type="button" class="button-secondary" :disabled="actionStatus === 'loading'" @click="runAction('false-alarm')">标记误报</button>
         </div>
         <p v-if="actionMessage" class="request-result" :class="`request-result--${actionStatus}`" role="status">{{ actionMessage }}</p>
+      </section>
+      <section class="warning-timeline">
+        <h3>状态变化时间线</h3>
+        <ol v-if="timeline.length">
+          <li v-for="item in timeline" :key="item.actionId">
+            <strong>{{ actionLabel(item.action) }}</strong>
+            <span>{{ item.createdAt }} · {{ item.operator }}<template v-if="item.target"> → {{ item.target }}</template></span>
+            <p v-if="item.remark">{{ item.remark }}</p>
+          </li>
+        </ol>
+        <p v-else>暂无处置记录。</p>
       </section>
       <h3>阈值快照</h3>
       <pre>{{ snapshotText(selected.thresholdSnapshot) }}</pre>

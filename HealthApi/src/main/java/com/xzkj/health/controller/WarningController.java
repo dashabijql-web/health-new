@@ -6,6 +6,7 @@ import com.xzkj.health.model.dto.WarningIncidentState;
 import com.xzkj.health.model.dto.WarningSourceCatalog;
 import com.xzkj.health.model.dto.WarningRecordPage;
 import com.xzkj.health.model.dto.WarningRecordView;
+import com.xzkj.health.model.dto.WarningTimelineItem;
 import com.xzkj.health.service.HealthWarningService;
 import com.xzkj.health.service.WarningClassificationService;
 import com.xzkj.health.service.WarningQueryService;
@@ -67,6 +68,12 @@ public class WarningController {
     public WarningIncidentState state(@PathVariable Long id,
                                       @RequestParam String occurredAt) {
         return warningLifecycleService.state(id, occurredAt);
+    }
+
+    @GetMapping("/{id}/timeline")
+    public List<WarningTimelineItem> timeline(@PathVariable Long id,
+                                              @RequestParam String occurredAt) {
+        return warningLifecycleService.timeline(id, occurredAt);
     }
 
     @PutMapping("/{id}/ack")

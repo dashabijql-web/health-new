@@ -1,11 +1,14 @@
 package com.xzkj.health.mapper;
 
 import com.xzkj.health.model.dto.WarningIncidentState;
+import com.xzkj.health.model.dto.WarningTimelineItem;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+
+import java.util.List;
 
 @Mapper
 public interface WarningIncidentMapper {
@@ -61,4 +64,15 @@ public interface WarningIncidentMapper {
                      @Param("operator") String operator,
                      @Param("target") String target,
                      @Param("remark") String remark);
+
+    @Select({
+            "SELECT CONVERT(varchar(36), id) AS action_id, action, result,",
+            "operator_name AS operator, target, remark,",
+            "CONVERT(varchar(19), created_at, 120) AS created_at",
+            "FROM command_center_incident_action",
+            "WHERE warning_id = #{warningId} AND occurred_at = CONVERT(datetime2, #{occurredAt}, 120)",
+            "ORDER BY created_at ASC, id ASC"
+    })
+    List<WarningTimelineItem> findTimeline(@Param("warningId") Long warningId,
+                                           @Param("occurredAt") String occurredAt);
 }
